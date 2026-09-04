@@ -6,7 +6,7 @@ from backend.db import get_db
 
 def clear(db):
     assert db.name.endswith('_test')
-    for name in ('products','customers','customer_consents','customer_segments','churn_signals','promotions','promotion_audience','promotion_coupons','notification_outbox'):db[name].delete_many({})
+    for name in ('products','customers','customer_consents','customer_segments','churn_signals','promotions','promotion_audience','promotion_coupons','promotion_redemptions','notification_outbox','sales','sale_items'):db[name].delete_many({})
 
 
 def test_promotion_respects_consent_and_control():
@@ -29,3 +29,17 @@ def test_unprofitable_promotion_is_rejected():
     pid=db.products.insert_one({'sku':'PROMO-2','name':'Margen corto','name_normalized':'margen corto','active':True,'current_price':Decimal128('10'),'average_cost':Decimal128('8'),'minimum_margin_percent':Decimal128('20')}).inserted_id
     payload={'name':'Descuento ruinoso','discount_percent':'20','product_ids':[str(pid)],'valid_from':now.isoformat(),'valid_until':(now+timedelta(days=2)).isoformat()}
     assert create_app(testing=True).test_client().post('/api/v1/promotions',json=payload).status_code==409
+
+
+def test_redemption_reduces_draft_total_before_payment():
+    db=get_db();clear(db);now=datetime.now(UTC)
+    product=db.products.insert_one({'sku':'PROMO-3','name':'Café','active':True,'current_price':Decimal128('10'),'average_cost':Decimal128('4')}).inserted_id
+    customer=db.customers.insert_one({'name':'Cliente cupón','status':'active'}).inserted_id
+    promotion=db.promotions.insert_one({'name':'Cupón café','status':'active','product_ids':[product],'discount_percent':Decimal128('10')}).inserted_id
+    coupon=db.promotion_coupons.insert_one({'promotion_id':promotion,'customer_id':customer,'code':'CAFE-10','status':'active','usage_count':0,'usage_limit':1,'valid_from':now-timedelta(minutes=1),'valid_until':now+timedelta(days=1)}).inserted_id
+    sale=db.sales.insert_one({'customer_id':customer,'status':'draft','subtotal':Decimal128('10'),'total':Decimal128('10')}).inserted_id
+    db.sale_items.insert_one({'sale_id':sale,'product_id':product,'line_total':Decimal128('10')})
+    response=create_app(testing=True).test_client().post('/api/v1/promotions/redemptions',json={'code':'CAFE-10','sale_id':str(sale)})
+    assert response.status_code==201 and response.json['data']['discount_amount']=='1.00'
+    updated=db.sales.find_one({'_id':sale});assert updated['total']==Decimal128('9.00') and updated['discount_total']==Decimal128('1.00')
+    assert db.promotion_coupons.find_one({'_id':coupon})['status']=='redeemed'

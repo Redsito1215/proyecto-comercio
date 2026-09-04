@@ -25,6 +25,7 @@ La documentación funcional sigue GitHub Spec Kit en `.specify/` y `specs/001` a
    `docker compose --profile tools run --rm seed`
 
 4. Abra `http://127.0.0.1:5001`.
+5. En **Primera instalación**, cree el administrador inicial. Después, todo acceso a la API requiere una sesión y permisos RBAC.
 
 ## Perfil analítico
 
@@ -32,12 +33,12 @@ Inicie ClickHouse y Airflow:
 
 `docker compose --profile analytics up -d --build`
 
-- ClickHouse HTTP: `http://127.0.0.1:8123`
 - Airflow: `http://127.0.0.1:8088`
 - DAG: `comercio_inteligente_etl`, programado cada hora.
 - Las credenciales iniciales de Airflow aparecen una vez en `docker compose logs airflow`.
 
 El perfil `analytics` es opcional para la operación diaria y obligatorio para la analítica histórica. Los informes operativos siguen disponibles si ClickHouse está temporalmente fuera de línea.
+MongoDB y ClickHouse permanecen dentro de la red Docker y no publican sus puertos de datos en el host.
 
 ## Informes
 
@@ -61,7 +62,7 @@ Las pruebas destructivas verifican que la base termine en `_test` antes de limpi
 
 ## Preparación de producción
 
-- Configure `APP_ENV=production`, secretos reales y HTTPS en el proxy.
+- Mantenga `APP_ENV=production`, configure secretos reales y termine HTTPS en un proxy antes de exponer el sistema fuera del equipo local.
 - Sustituya `local-sandbox` por un proveedor certificado que entregue tokens.
 - Use PostgreSQL para metadatos de Airflow si el despliegue deja de ser local.
 - Configure respaldos, rotación de secretos, monitoreo y retención de auditoría.

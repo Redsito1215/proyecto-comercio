@@ -23,6 +23,15 @@ def allocate_lot_quantities(lots: list[dict], quantity: int) -> list[dict]:
     raise ValueError("Existencia por lote insuficiente")
 
 
+def weighted_average_cost(on_hand: int, current_cost, received: int, received_cost: Decimal) -> Decimal:
+    current = current_cost.to_decimal() if isinstance(current_cost, Decimal128) else Decimal(str(current_cost or 0))
+    valued_units = max(on_hand, 0)
+    total_units = valued_units + received
+    if total_units <= 0:
+        return received_cost
+    return ((current * valued_units) + (received_cost * received)) / total_units
+
+
 def receive_inventory(db, model, idempotency_key: str, actor_id: str):
     prior = db.inventory_movements.find_one({"idempotency_key": idempotency_key})
     if prior:
@@ -43,9 +52,11 @@ def receive_inventory(db, model, idempotency_key: str, actor_id: str):
                  "$inc": {"quantity": line.quantity, "available_quantity": line.quantity}},
                 upsert=True, return_document=True, session=session,
             )
+            stock = db.inventory.find_one({"product_id": product_id, "location_id": model.location_id}, session=session) or {}
+            average_cost = weighted_average_cost(stock.get("on_hand", 0), stock.get("average_cost", 0), line.quantity, line.unit_cost)
             db.inventory.update_one(
                 {"product_id": product_id, "location_id": model.location_id},
-                {"$setOnInsert": {"reserved": 0, "created_at": now}, "$set": {"average_cost": Decimal128(line.unit_cost), "updated_at": now},
+                {"$setOnInsert": {"reserved": 0, "created_at": now}, "$set": {"average_cost": Decimal128(average_cost), "updated_at": now},
                  "$inc": {"on_hand": line.quantity, "available": line.quantity}}, upsert=True, session=session,
             )
             db.inventory_movements.insert_one({
@@ -94,7 +105,9 @@ def receive_purchase_order(db, order_id: str, model, key: str, actor_id: str):
             if not item: raise ApiError("Cantidad recibida supera lo pendiente",409,"receipt_quantity_conflict")
             expiry=datetime.fromisoformat(line.expires_at).replace(tzinfo=UTC) if line.expires_at else None
             lot=db.lots.find_one_and_update({"product_id":pid,"location_id":order["location_id"],"lot_number":line.lot_number},{"$setOnInsert":{"created_at":now,"status":"available","expires_at":expiry},"$set":{"unit_cost":Decimal128(line.unit_cost),"updated_at":now},"$inc":{"quantity":line.quantity,"available_quantity":line.quantity}},upsert=True,return_document=True,session=session)
-            db.inventory.update_one({"product_id":pid,"location_id":order["location_id"]},{"$setOnInsert":{"reserved":0,"created_at":now},"$set":{"average_cost":Decimal128(line.unit_cost),"updated_at":now},"$inc":{"on_hand":line.quantity,"available":line.quantity}},upsert=True,session=session)
+            stock=db.inventory.find_one({"product_id":pid,"location_id":order["location_id"]},session=session) or {}
+            average_cost=weighted_average_cost(stock.get("on_hand",0),stock.get("average_cost",0),line.quantity,line.unit_cost)
+            db.inventory.update_one({"product_id":pid,"location_id":order["location_id"]},{"$setOnInsert":{"reserved":0,"created_at":now},"$set":{"average_cost":Decimal128(average_cost),"updated_at":now},"$inc":{"on_hand":line.quantity,"available":line.quantity}},upsert=True,session=session)
             db.purchase_order_items.update_one({"_id":item["_id"]},{"$inc":{"received_quantity":line.quantity,"pending_quantity":-line.quantity}},session=session)
             db.inventory_movements.insert_one({"product_id":pid,"location_id":order["location_id"],"lot_id":lot["_id"],"type":"receipt","quantity":line.quantity,"unit_cost":Decimal128(line.unit_cost),"source_type":"purchase_order","source_id":oid,"idempotency_key":key,"actor_id":actor_id,"occurred_at":now},session=session)
         pending=db.purchase_order_items.count_documents({"purchase_order_id":oid,"pending_quantity":{"$gt":0}},session=session)
@@ -108,13 +121,18 @@ def list_purchase_orders(db):
 
 
 def create_stock_count(db, model, actor_id):
-    now=datetime.now(UTC); count_id=db.stock_counts.insert_one({'location_id':model.location_id,'status':'open','actor_id':actor_id,'created_at':now}).inserted_id; rows=[]
+    prepared=[]
     for line in model.items:
         pid=ObjectId(line.product_id) if ObjectId.is_valid(line.product_id) else None
         stock=db.inventory.find_one({'product_id':pid,'location_id':model.location_id})
         if not stock: raise ApiError('No existe inventario para el producto',404,'inventory_not_found')
-        rows.append({'stock_count_id':count_id,'product_id':pid,'theoretical_quantity':stock['on_hand'],'physical_quantity':line.physical_quantity,'difference':line.physical_quantity-stock['on_hand'],'reason':line.reason})
-    db.stock_count_items.insert_many(rows); return {'id':str(count_id),'status':'open'}
+        prepared.append((line,pid,stock))
+    now=datetime.now(UTC)
+    with transaction() as session:
+        count_id=db.stock_counts.insert_one({'location_id':model.location_id,'status':'open','actor_id':actor_id,'created_at':now},session=session).inserted_id
+        rows=[{'stock_count_id':count_id,'product_id':pid,'theoretical_quantity':stock['on_hand'],'physical_quantity':line.physical_quantity,'difference':line.physical_quantity-stock['on_hand'],'reason':line.reason} for line,pid,stock in prepared]
+        db.stock_count_items.insert_many(rows,session=session)
+    return {'id':str(count_id),'status':'open'}
 
 
 def approve_stock_count(db, count_id, actor_id):
@@ -206,12 +224,13 @@ def create_sale_draft(db, model, actor_id: str):
             "quantity": line.quantity, "unit_price": Decimal128(price), "line_total": Decimal128(total),
             "unit_cost": product.get("average_cost", Decimal128("0")),
         })
-    sale_id = db.sales.insert_one({
-        "location_id": model.location_id, "customer_id": model.customer_id, "status": "draft",
-        "subtotal": Decimal128(subtotal), "total": Decimal128(subtotal), "actor_id": actor_id,
-        "created_at": now, "updated_at": now, "version": 1,
-    }).inserted_id
-    db.sale_items.insert_many([{**item, "sale_id": sale_id} for item in items])
+    with transaction() as session:
+        sale_id = db.sales.insert_one({
+            "location_id": model.location_id, "customer_id": model.customer_id, "status": "draft",
+            "subtotal": Decimal128(subtotal), "total": Decimal128(subtotal), "actor_id": actor_id,
+            "created_at": now, "updated_at": now, "version": 1,
+        },session=session).inserted_id
+        db.sale_items.insert_many([{**item, "sale_id": sale_id} for item in items],session=session)
     return serialize_sale(get_sale(db, str(sale_id)))
 
 

@@ -5,6 +5,7 @@ from bson import Decimal128,ObjectId
 from backend.common.errors import ApiError
 from backend.common.serialization import to_json
 from backend.modules.promotions.eligibility import eligible_for_segment,experimental_group
+from backend.db import transaction
 
 
 def dec(value): return value.to_decimal() if isinstance(value,Decimal128) else Decimal(str(value))
@@ -72,17 +73,23 @@ def activate(db,pid,actor):
 
 
 def redeem(db,model,actor):
-    now=datetime.now(UTC);coupon=db.promotion_coupons.find_one({"code":model.code,"status":"active","valid_from":{"$lte":now},"valid_until":{"$gte":now}})
-    if not coupon:raise ApiError("Cupón inválido o vencido",409,"coupon_invalid")
-    if coupon["usage_count"]>=coupon["usage_limit"]:raise ApiError("Cupón sin usos disponibles",409,"coupon_limit")
+    now=datetime.now(UTC)
     if not ObjectId.is_valid(model.sale_id):raise ApiError("Venta no encontrada",404,"sale_not_found")
-    sale=db.sales.find_one({"_id":ObjectId(model.sale_id),"customer_id":{"$in":[coupon["customer_id"],str(coupon["customer_id"])]},"status":{"$in":["confirmed","partially_returned"]}})
-    if not sale:raise ApiError("La venta no corresponde al cliente del cupón",409,"coupon_customer_mismatch")
-    prior=db.promotion_redemptions.find_one({"coupon_id":coupon["_id"],"sale_id":sale["_id"]})
-    if prior:return {"id":str(prior["_id"]),"status":"redeemed"}
-    promotion=db.promotions.find_one({"_id":coupon["promotion_id"]});discount=(dec(sale["total"])*dec(promotion["discount_percent"])/100).quantize(Decimal("0.01"))
-    rid=db.promotion_redemptions.insert_one({"promotion_id":promotion["_id"],"coupon_id":coupon["_id"],"customer_id":coupon["customer_id"],"sale_id":sale["_id"],"discount_amount":Decimal128(discount),"actor_id":actor,"redeemed_at":now}).inserted_id
-    db.promotion_coupons.update_one({"_id":coupon["_id"]},{"$inc":{"usage_count":1},"$set":{"status":"redeemed" if coupon["usage_count"]+1>=coupon["usage_limit"] else "active"}})
+    with transaction() as session:
+        coupon=db.promotion_coupons.find_one({"code":model.code,"status":"active","valid_from":{"$lte":now},"valid_until":{"$gte":now}},session=session)
+        if not coupon:raise ApiError("Cupón inválido o vencido",409,"coupon_invalid")
+        if coupon["usage_count"]>=coupon["usage_limit"]:raise ApiError("Cupón sin usos disponibles",409,"coupon_limit")
+        sale=db.sales.find_one({"_id":ObjectId(model.sale_id),"customer_id":{"$in":[coupon["customer_id"],str(coupon["customer_id"])]},"status":"draft"},session=session)
+        if not sale:raise ApiError("El cupón debe aplicarse a la venta del cliente antes de confirmarla",409,"coupon_customer_mismatch")
+        prior=db.promotion_redemptions.find_one({"coupon_id":coupon["_id"],"sale_id":sale["_id"]},session=session)
+        if prior:return {"id":str(prior["_id"]),"status":"redeemed"}
+        promotion=db.promotions.find_one({"_id":coupon["promotion_id"]},session=session)
+        eligible_total=sum((dec(row["line_total"]) for row in db.sale_items.find({"sale_id":sale["_id"],"product_id":{"$in":promotion["product_ids"]}},session=session)),Decimal("0"))
+        if not eligible_total:raise ApiError("La venta no contiene productos de la promoción",409,"coupon_product_mismatch")
+        discount=(eligible_total*dec(promotion["discount_percent"])/100).quantize(Decimal("0.01"));net=dec(sale["total"])-discount
+        rid=db.promotion_redemptions.insert_one({"promotion_id":promotion["_id"],"coupon_id":coupon["_id"],"customer_id":coupon["customer_id"],"sale_id":sale["_id"],"discount_amount":Decimal128(discount),"actor_id":actor,"redeemed_at":now},session=session).inserted_id
+        db.sales.update_one({"_id":sale["_id"]},{"$set":{"discount_total":Decimal128(discount),"total":Decimal128(net),"promotion_id":promotion["_id"],"updated_at":now}},session=session)
+        db.promotion_coupons.update_one({"_id":coupon["_id"]},{"$inc":{"usage_count":1},"$set":{"status":"redeemed" if coupon["usage_count"]+1>=coupon["usage_limit"] else "active"}},session=session)
     return {"id":str(rid),"status":"redeemed","discount_amount":str(discount)}
 
 

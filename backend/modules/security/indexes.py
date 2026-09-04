@@ -3,9 +3,9 @@ from pymongo import ASCENDING,DESCENDING,IndexModel
 
 ROLE_DEFINITIONS={
     "admin":["*"],
-    "cashier":["products.read","sales.write","sales.confirm","payments.write","returns.write"],
-    "supervisor":["products.read","products.write","sales.write","sales.confirm","payments.write","payments.refund","inventory.read","inventory.receive","inventory.count","inventory.adjust","purchases.read","purchases.write","purchases.receive","returns.write"],
-    "auditor":["products.read","inventory.read","security.audit.read","payments.read"],
+    "cashier":["products.read","sales.read","sales.write","sales.confirm","payments.write","returns.write"],
+    "supervisor":["products.read","products.write","sales.read","sales.write","sales.confirm","payments.read","payments.write","payments.refund","inventory.read","inventory.receive","inventory.count","inventory.adjust","purchases.read","purchases.write","purchases.receive","customers.read","returns.write","reports.read"],
+    "auditor":["products.read","sales.read","inventory.read","security.audit.read","payments.read","customers.read","reports.read"],
 }
 
 

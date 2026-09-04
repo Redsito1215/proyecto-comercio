@@ -1,6 +1,16 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+class UniqueProductLines(BaseModel):
+    @model_validator(mode="after")
+    def unique_products(self):
+        items = getattr(self, "items", [])
+        product_ids = [line.product_id for line in items]
+        if len(product_ids) != len(set(product_ids)):
+            raise ValueError("Cada producto debe aparecer una sola vez")
+        return self
 
 
 class ProductCreate(BaseModel):
@@ -23,7 +33,7 @@ class SaleLineCreate(BaseModel):
     quantity: int = Field(gt=0, le=10000)
 
 
-class SaleCreate(BaseModel):
+class SaleCreate(UniqueProductLines):
     location_id: str = Field(default="main", min_length=1, max_length=60)
     customer_id: str | None = None
     items: list[SaleLineCreate] = Field(min_length=1, max_length=200)
@@ -37,7 +47,7 @@ class ReceiptLine(BaseModel):
     expires_at: str | None = None
 
 
-class InventoryReceiptCreate(BaseModel):
+class InventoryReceiptCreate(UniqueProductLines):
     location_id: str = Field(default="main", min_length=1, max_length=60)
     items: list[ReceiptLine] = Field(min_length=1, max_length=500)
 
@@ -48,13 +58,13 @@ class PurchaseOrderLine(BaseModel):
     unit_cost: Decimal = Field(ge=0, decimal_places=2)
 
 
-class PurchaseOrderCreate(BaseModel):
+class PurchaseOrderCreate(UniqueProductLines):
     supplier_name: str = Field(min_length=2, max_length=160)
     location_id: str = Field(default="main", min_length=1, max_length=60)
     items: list[PurchaseOrderLine] = Field(min_length=1, max_length=500)
 
 
-class PurchaseReceiptCreate(BaseModel):
+class PurchaseReceiptCreate(UniqueProductLines):
     items: list[ReceiptLine] = Field(min_length=1, max_length=500)
 
 
@@ -64,7 +74,7 @@ class StockCountLine(BaseModel):
     reason: str = Field(min_length=3, max_length=300)
 
 
-class StockCountCreate(BaseModel):
+class StockCountCreate(UniqueProductLines):
     location_id: str = Field(default="main", min_length=1, max_length=60)
     items: list[StockCountLine] = Field(min_length=1, max_length=1000)
 
@@ -82,6 +92,6 @@ class ReturnLine(BaseModel):
     reason: str = Field(min_length=3, max_length=300)
 
 
-class ReturnCreate(BaseModel):
+class ReturnCreate(UniqueProductLines):
     sale_id: str = Field(min_length=24, max_length=24)
     items: list[ReturnLine] = Field(min_length=1, max_length=200)

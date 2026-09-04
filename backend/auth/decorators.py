@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask import g, request
+from flask import current_app, g, request
 
 from backend.common.errors import ApiError
 
@@ -26,5 +26,4 @@ def require_permission(permission: str):
 
 
 def get_development_bypass() -> bool:
-    from backend.config import get_settings
-    return get_settings().app_env == "development"
+    return bool(current_app.testing)

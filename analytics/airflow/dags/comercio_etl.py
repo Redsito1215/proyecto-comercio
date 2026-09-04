@@ -23,6 +23,10 @@ def load_operational_facts():
     if item_rows:click.insert("sale_item_facts",item_rows,column_names=["sale_id","product_id","sku","product_name","quantity","unit_price","unit_cost","line_total","loaded_at"])
     stocks=[(loaded,str(x["product_id"]),x.get("location_id","main"),x.get("on_hand",0),x.get("available",0),decimal_value(x.get("average_cost"))) for x in mongo.inventory.find()]
     if stocks:click.insert("inventory_snapshots",stocks,column_names=["captured_at","product_id","location_id","on_hand","available","average_cost"])
+    # ReplacingMergeTree deduplica en segundo plano; forzamos la consolidación
+    # para que una ejecución repetida no duplique temporalmente ventas ni líneas.
+    if sale_rows:click.command("OPTIMIZE TABLE sales_facts FINAL")
+    if item_rows:click.command("OPTIMIZE TABLE sale_item_facts FINAL")
 
 
 with DAG("comercio_inteligente_etl",start_date=datetime(2026,1,1),schedule="0 * * * *",catchup=False,default_args={"retries":2,"retry_delay":timedelta(minutes=2)},tags=["comercio","clickhouse"]) as dag:
