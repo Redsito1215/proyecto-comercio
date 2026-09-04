@@ -1,0 +1,13 @@
+openapi: 3.1.0
+info: {title: Comercio Inteligente - Pagos y seguridad, version: 1.0.0}
+paths:
+  /api/v1/security/login:
+    post: {summary: Inicia sesión, responses: {'200': {description: Token opaco}, '401': {description: Credenciales inválidas}}}
+  /api/v1/security/users:
+    post: {summary: Crea usuario, responses: {'201': {description: Creado}, '403': {description: Sin permiso}}}
+  /api/v1/payments:
+    post: {summary: Crea y procesa pago sandbox idempotente, responses: {'201': {description: Procesado}, '409': {description: Excede saldo}}}
+  /api/v1/payments/{id}/refunds:
+    post: {summary: Reembolsa importe aprobado, responses: {'201': {description: Procesado}}}
+  /api/v1/security/audit:
+    get: {summary: Consulta auditoría sanitizada, responses: {'200': {description: OK}}}

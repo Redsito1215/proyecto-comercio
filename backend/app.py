@@ -17,6 +17,10 @@ from backend.modules.promotions.indexes import ensure_promotion_indexes
 from backend.modules.promotions.routes import promotions_bp
 from backend.modules.controls.indexes import ensure_control_indexes
 from backend.modules.controls.routes import controls_bp
+from backend.modules.security.indexes import ensure_security_indexes
+from backend.modules.security.routes import security_bp
+from backend.modules.payments.indexes import ensure_payment_indexes
+from backend.modules.payments.routes import payments_bp
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -30,6 +34,17 @@ def create_app(testing: bool = False) -> Flask:
     app.register_blueprint(forecasting_bp)
     app.register_blueprint(promotions_bp)
     app.register_blueprint(controls_bp)
+    app.register_blueprint(security_bp)
+    app.register_blueprint(payments_bp)
+
+    @app.after_request
+    def security_headers(response):
+        response.headers["X-Content-Type-Options"]="nosniff"
+        response.headers["X-Frame-Options"]="DENY"
+        response.headers["Referrer-Policy"]="no-referrer"
+        response.headers["Permissions-Policy"]="camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"]="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:"
+        return response
 
     @app.get("/api/v1/health")
     def health():
@@ -46,6 +61,8 @@ def create_app(testing: bool = False) -> Flask:
         ensure_forecast_indexes(get_db())
         ensure_promotion_indexes(get_db())
         ensure_control_indexes(get_db())
+        ensure_security_indexes(get_db())
+        ensure_payment_indexes(get_db())
     return app
 
 

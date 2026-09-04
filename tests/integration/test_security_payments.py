@@ -1,0 +1,33 @@
+from datetime import UTC,datetime
+from bson import Decimal128
+from backend.app import create_app
+from backend.db import get_db
+
+
+def clear(db):
+    assert db.name.endswith('_test')
+    for name in ('users','auth_sessions','audit_events','payments','refunds','sales'):db[name].delete_many({})
+
+
+def test_bootstrap_login_hashes_password_and_session_token():
+    db=get_db();clear(db);client=create_app(testing=True).test_client();password='Una-Clave-Muy-Segura-2026'
+    created=client.post('/api/v1/security/bootstrap',json={'name':'Administrador','email':'admin@example.com','password':password});assert created.status_code==201
+    user=db.users.find_one();assert user['password_hash']!=password and 'scrypt' in user['password_hash']
+    logged=client.post('/api/v1/security/login',json={'email':'admin@example.com','password':password});assert logged.status_code==200;raw=logged.json['data']['access_token']
+    session=db.auth_sessions.find_one();assert session['token_hash']!=raw and raw not in str(session)
+    assert db.audit_events.count_documents({'action':'auth.login'})==1
+
+
+def test_payment_is_idempotent_and_stores_no_pan_or_cvv():
+    db=get_db();clear(db);sid=db.sales.insert_one({'number':'VTA-PAY-1','status':'confirmed','total':Decimal128('10'),'created_at':datetime.now(UTC)}).inserted_id;client=create_app(testing=True).test_client()
+    payload={'sale_id':str(sid),'method':'card','amount':'10','payment_method_token':'tok_approved_opaque','brand':'Visa','last4':'4242'};headers={'Idempotency-Key':'payment-integration-1'}
+    first=client.post('/api/v1/payments',headers=headers,json=payload);second=client.post('/api/v1/payments',headers=headers,json=payload)
+    assert first.status_code==201 and second.status_code==201 and first.json['data']['id']==second.json['data']['id']
+    payment=db.payments.find_one();serialized=str(payment).lower();assert '4111111111111111' not in serialized and 'cvv' not in serialized and 'tok_approved_opaque' not in serialized
+    assert payment['status']=='approved' and db.payments.count_documents({})==1
+
+
+def test_payment_cannot_exceed_sale_balance():
+    db=get_db();clear(db);sid=db.sales.insert_one({'number':'VTA-PAY-2','status':'confirmed','total':Decimal128('5'),'created_at':datetime.now(UTC)}).inserted_id
+    response=create_app(testing=True).test_client().post('/api/v1/payments',headers={'Idempotency-Key':'too-much'},json={'sale_id':str(sid),'method':'cash','amount':'6'})
+    assert response.status_code==409
