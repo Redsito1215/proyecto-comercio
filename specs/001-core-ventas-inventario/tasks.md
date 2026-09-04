@@ -4,22 +4,22 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear paquetes y archivos base según `specs/001-core-ventas-inventario/plan.md`
-- [ ] T002 Configurar dependencias Python en `requirements.txt`
-- [ ] T003 [P] Configurar variables documentadas en `.env.example`
-- [ ] T004 [P] Definir servicios MongoDB replica set y backend en `docker-compose.yml`
-- [ ] T005 [P] Crear imagen reproducible en `Dockerfile`
+- [X] T001 Crear paquetes y archivos base según `specs/001-core-ventas-inventario/plan.md`
+- [X] T002 Configurar dependencias Python en `requirements.txt`
+- [X] T003 [P] Configurar variables documentadas en `.env.example`
+- [X] T004 [P] Definir servicios MongoDB replica set y backend en `docker-compose.yml`
+- [X] T005 [P] Crear imagen reproducible en `Dockerfile`
 
 ## Phase 2: Foundational
 
-- [ ] T006 Crear configuración validada en `backend/config.py`
-- [ ] T007 Crear conexión, transacciones y health check en `backend/db.py`
-- [ ] T008 [P] Crear errores JSON comunes en `backend/common/errors.py`
-- [ ] T009 [P] Crear serialización Decimal128/fechas en `backend/common/serialization.py`
-- [ ] T010 [P] Crear autorización mínima en `backend/auth/decorators.py`
-- [ ] T011 Crear índices y validadores en `backend/modules/core/indexes.py`
-- [ ] T012 Crear aplicación y registro modular en `backend/app.py`
-- [ ] T013 [P] Probar configuración y decimales en `tests/unit/test_common.py`
+- [X] T006 Crear configuración validada en `backend/config.py`
+- [X] T007 Crear conexión, transacciones y health check en `backend/db.py`
+- [X] T008 [P] Crear errores JSON comunes en `backend/common/errors.py`
+- [X] T009 [P] Crear serialización Decimal128/fechas en `backend/common/serialization.py`
+- [X] T010 [P] Crear autorización mínima en `backend/auth/decorators.py`
+- [X] T011 Crear índices y validadores en `backend/modules/core/indexes.py`
+- [X] T012 Crear aplicación y registro modular en `backend/app.py`
+- [X] T013 [P] Probar configuración y decimales en `tests/unit/test_common.py`
 
 ## Phase 3: User Story 1 - Cobrar rápidamente (P1) MVP
 

@@ -1,0 +1,1 @@
+"""Ventas e inventario."""
