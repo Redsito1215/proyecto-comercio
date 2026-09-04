@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info: {title: Comercio Inteligente - Precios, version: 1.0.0}
+paths:
+  /api/v1/pricing/margins:
+    get: {summary: Lista márgenes y alertas, responses: {'200': {description: OK}}}
+  /api/v1/pricing/simulations:
+    post: {summary: Simula un precio sin modificarlo, responses: {'200': {description: Simulación}, '422': {description: Datos inválidos}}}
+  /api/v1/pricing/products/{productId}/price:
+    put:
+      summary: Aplica un precio autorizado
+      parameters: [{name: productId, in: path, required: true, schema: {type: string}}]
+      responses: {'200': {description: Precio aplicado}, '409': {description: Margen bajo el mínimo}}
+  /api/v1/pricing/competitor-prices:
+    post: {summary: Registra precio competitivo, responses: {'201': {description: Creado}}}

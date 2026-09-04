@@ -9,6 +9,8 @@ from backend.modules.core.indexes import ensure_indexes
 from backend.modules.core.routes import core_bp
 from backend.modules.customers.indexes import ensure_customer_indexes
 from backend.modules.customers.routes import customers_bp
+from backend.modules.pricing.indexes import ensure_pricing_indexes
+from backend.modules.pricing.routes import pricing_bp
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -18,6 +20,7 @@ def create_app(testing: bool = False) -> Flask:
     register_error_handlers(app)
     app.register_blueprint(core_bp)
     app.register_blueprint(customers_bp)
+    app.register_blueprint(pricing_bp)
 
     @app.get("/api/v1/health")
     def health():
@@ -30,6 +33,7 @@ def create_app(testing: bool = False) -> Flask:
     if not testing:
         ensure_indexes(get_db())
         ensure_customer_indexes(get_db())
+        ensure_pricing_indexes(get_db())
     return app
 
 
