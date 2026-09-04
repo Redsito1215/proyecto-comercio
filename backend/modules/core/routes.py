@@ -6,8 +6,8 @@ from backend.common.errors import ApiError
 from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
-from backend.modules.core.schemas import InventoryReceiptCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, SaleCreate
-from backend.modules.core.services import confirm_sale, create_purchase_order, create_sale_draft, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, serialize_product
+from backend.modules.core.schemas import InventoryReceiptCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, SaleCreate, StockCountCreate
+from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_sale_draft, create_stock_count, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
 
@@ -92,3 +92,21 @@ def purchase_orders_receive(order_id):
     if not key: raise ApiError("Se requiere Idempotency-Key",400,"idempotency_key_required")
     model=validate(PurchaseReceiptCreate,request.get_json(silent=True))
     return jsonify({"data":receive_purchase_order(get_db(),order_id,model,key,g.actor_id)}),201
+
+
+@core_bp.post('/stock-counts')
+@require_permission('inventory.count')
+def stock_counts_create():
+    return jsonify({'data':create_stock_count(get_db(),validate(StockCountCreate,request.get_json(silent=True)),g.actor_id)}),201
+
+
+@core_bp.post('/stock-counts/<count_id>/approve')
+@require_permission('inventory.adjust')
+def stock_counts_approve(count_id):
+    return jsonify({'data':approve_stock_count(get_db(),count_id,g.actor_id)})
+
+
+@core_bp.post('/lost-sales')
+@require_permission('sales.write')
+def lost_sales_create():
+    model=validate(LostSaleCreate,request.get_json(silent=True)); return jsonify({'data':{'id':record_lost_sale(get_db(),model,g.actor_id)}}),201

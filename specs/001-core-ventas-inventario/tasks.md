@@ -58,10 +58,10 @@
 
 **Independent Test**: aprobar diferencia y registrar demanda no atendida.
 
-- [ ] T032 [P] [US4] Escribir pruebas de conteo en `tests/integration/test_stock_count.py`
-- [ ] T033 [US4] Implementar conteos y ajustes en `backend/modules/core/services.py`
-- [ ] T034 [US4] Implementar ventas perdidas en `backend/modules/core/routes.py`
-- [ ] T035 [P] [US4] Crear UI de conteos en `frontend/js/modules/core/counts.js`
+- [X] T032 [P] [US4] Escribir pruebas de conteo en `tests/integration/test_stock_count.py`
+- [X] T033 [US4] Implementar conteos y ajustes en `backend/modules/core/services.py`
+- [X] T034 [US4] Implementar ventas perdidas en `backend/modules/core/routes.py`
+- [X] T035 [P] [US4] Crear UI de conteos en `frontend/js/modules/core/counts.js`
 
 ## Phase 7: User Story 5 - Devoluciones (P3)
 

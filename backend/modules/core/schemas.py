@@ -56,3 +56,20 @@ class PurchaseOrderCreate(BaseModel):
 
 class PurchaseReceiptCreate(BaseModel):
     items: list[ReceiptLine] = Field(min_length=1, max_length=500)
+
+
+class StockCountLine(BaseModel):
+    product_id: str = Field(min_length=24, max_length=24)
+    physical_quantity: int = Field(ge=0)
+    reason: str = Field(min_length=3, max_length=300)
+
+
+class StockCountCreate(BaseModel):
+    location_id: str = Field(default="main", min_length=1, max_length=60)
+    items: list[StockCountLine] = Field(min_length=1, max_length=1000)
+
+
+class LostSaleCreate(BaseModel):
+    product_id: str = Field(min_length=24, max_length=24)
+    requested_quantity: int = Field(gt=0)
+    reason: str = Field(default="out_of_stock", max_length=80)

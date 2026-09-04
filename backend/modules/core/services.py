@@ -107,6 +107,38 @@ def list_purchase_orders(db):
     return [{**to_json(row),"id":str(row["_id"])} for row in db.purchase_orders.find().sort("created_at",-1).limit(100)]
 
 
+def create_stock_count(db, model, actor_id):
+    now=datetime.now(UTC); count_id=db.stock_counts.insert_one({'location_id':model.location_id,'status':'open','actor_id':actor_id,'created_at':now}).inserted_id; rows=[]
+    for line in model.items:
+        pid=ObjectId(line.product_id) if ObjectId.is_valid(line.product_id) else None
+        stock=db.inventory.find_one({'product_id':pid,'location_id':model.location_id})
+        if not stock: raise ApiError('No existe inventario para el producto',404,'inventory_not_found')
+        rows.append({'stock_count_id':count_id,'product_id':pid,'theoretical_quantity':stock['on_hand'],'physical_quantity':line.physical_quantity,'difference':line.physical_quantity-stock['on_hand'],'reason':line.reason})
+    db.stock_count_items.insert_many(rows); return {'id':str(count_id),'status':'open'}
+
+
+def approve_stock_count(db, count_id, actor_id):
+    if not ObjectId.is_valid(count_id): raise ApiError('Conteo no encontrado',404,'count_not_found')
+    cid=ObjectId(count_id)
+    with transaction() as session:
+        count=db.stock_counts.find_one({'_id':cid,'status':'open'},session=session)
+        if not count: raise ApiError('Conteo no disponible',409,'count_state_conflict')
+        now=datetime.now(UTC)
+        for item in db.stock_count_items.find({'stock_count_id':cid},session=session):
+            diff=item['difference']
+            if diff:
+                db.inventory.update_one({'product_id':item['product_id'],'location_id':count['location_id']},{'$inc':{'on_hand':diff,'available':diff},'$set':{'updated_at':now}},session=session)
+                db.inventory_movements.insert_one({'product_id':item['product_id'],'location_id':count['location_id'],'type':'count_adjustment','quantity':diff,'source_type':'stock_count','source_id':cid,'reason':item['reason'],'actor_id':actor_id,'occurred_at':now},session=session)
+        db.stock_counts.update_one({'_id':cid},{'$set':{'status':'approved','approved_by':actor_id,'approved_at':now}},session=session)
+    return {'id':count_id,'status':'approved'}
+
+
+def record_lost_sale(db, model, actor_id):
+    if not ObjectId.is_valid(model.product_id) or not db.products.find_one({'_id':ObjectId(model.product_id)}): raise ApiError('Producto no encontrado',404,'product_not_found')
+    doc={'product_id':ObjectId(model.product_id),'requested_quantity':model.requested_quantity,'reason':model.reason,'actor_id':actor_id,'occurred_at':datetime.now(UTC)}
+    return str(db.lost_sales.insert_one(doc).inserted_id)
+
+
 def create_product(db, model):
     from backend.modules.core.repositories import insert_product
     try:
