@@ -18,6 +18,7 @@
   <script src="/js/modules/core/inventory.js" defer></script>
   <script src="/js/modules/core/purchases.js" defer></script>
   <script src="/js/modules/core/counts.js" defer></script>
+  <script src="/js/modules/core/returns.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -37,6 +38,7 @@
           <button class="nav-item" data-page="ventas"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h10v14H5zM7 7h6M7 10h6M7 13h4"/></svg></span><span class="nav-label">Ventas</span></button>
           <button class="nav-item" data-page="inventario"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14v3H3zM5 8v8h10V8M8 11h4"/></svg></span><span class="nav-label">Inventario y compras</span></button>
           <button class="nav-item" data-page="caja"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14v11H3zM3 8h14M13 12h2"/></svg></span><span class="nav-label">Caja y pagos</span></button>
+          <button class="nav-item" data-page="devoluciones"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 5H3v-4M3 5c2-3 7-4 11-1s4 9 1 12-8 3-11 0"/></svg></span><span class="nav-label">Devoluciones</span></button>
         </div>
       </div>
       <div class="nav-block nav-folder">
@@ -107,6 +109,7 @@
           <section class="panel purchase-panel"><div class="panel-head"><div><span class="eyebrow">Conciliación</span><h2>Conteo físico</h2></div></div><form id="count-form" class="inline-form count-form"><label>Producto<select name="product_id" id="count-product" required></select></label><label>Cantidad física<input name="physical_quantity" type="number" min="0" required></label><label>Motivo<input name="reason" required value="Conteo físico"></label><button class="btn btn-primary" type="submit">Registrar y aprobar</button></form><p class="form-message" id="count-message"></p></section>
         </div>
       </section>
+      <section class="page" id="page-devoluciones"><div class="page-shell"><div class="page-hero"><span class="page-badge">Trazabilidad comercial</span><h1 class="page-title">Registrar devolución</h1><p class="page-lead">Reintegra solo mercancía apta y registra el producto dañado como merma.</p></div><section class="panel"><form id="return-form" class="return-form"><label>Id. de venta<input name="sale_id" required minlength="24" maxlength="24"></label><label>Id. de producto<input name="product_id" required minlength="24" maxlength="24"></label><label>Cantidad apta<input name="fit_quantity" type="number" min="0" value="0"></label><label>Cantidad dañada<input name="damaged_quantity" type="number" min="0" value="0"></label><label class="wide">Motivo<input name="reason" required value="Devolución del cliente"></label><button class="btn btn-primary" type="submit">Confirmar devolución</button></form><p id="return-message" class="form-message"></p></section></div></section>
       <section class="page" id="page-placeholder"><div class="page-shell"><div class="page-hero"><span class="page-badge">Módulo planificado</span><h1 class="page-title" id="placeholder-title">Módulo</h1><p class="page-lead">Esta sección se implementará siguiendo su especificación de Spec Kit.</p></div><div class="panel"><div class="empty-state"><span class="empty-mark">CI</span><h3>Preparado para implementación</h3><p>La navegación y el diseño ya forman parte del sistema base.</p></div></div></div></section>
     </main>
   </div>

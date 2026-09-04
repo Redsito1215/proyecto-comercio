@@ -139,6 +139,41 @@ def record_lost_sale(db, model, actor_id):
     return str(db.lost_sales.insert_one(doc).inserted_id)
 
 
+def validate_return_quantity(sold: int, previously_returned: int, requested: int) -> int:
+    available=sold-previously_returned
+    if requested<1 or requested>available: raise ValueError('Cantidad de devolución fuera del límite disponible')
+    return available
+
+
+def create_return(db, model, key, actor_id):
+    prior=db.returns.find_one({'idempotency_key':key})
+    if prior:return {'id':str(prior['_id']),'number':prior['number'],'status':prior['status']}
+    if not ObjectId.is_valid(model.sale_id):raise ApiError('Venta no encontrada',404,'sale_not_found')
+    sid=ObjectId(model.sale_id)
+    with transaction() as session:
+        sale=db.sales.find_one({'_id':sid,'status':{'$in':['confirmed','partially_returned']}},session=session)
+        if not sale:raise ApiError('Venta no disponible para devolución',409,'return_state_conflict')
+        now=datetime.now(UTC); rid=ObjectId(); number=next_number(db,'returns','DEV',session=session); docs=[]
+        for line in model.items:
+            pid=ObjectId(line.product_id) if ObjectId.is_valid(line.product_id) else None
+            sold=db.sale_items.find_one({'sale_id':sid,'product_id':pid},session=session)
+            if not sold:raise ApiError('Producto no pertenece a la venta',422,'return_product_invalid')
+            previous=sum(x.get('fit_quantity',0)+x.get('damaged_quantity',0) for x in db.return_items.find({'sale_id':sid,'product_id':pid},session=session))
+            requested=line.fit_quantity+line.damaged_quantity
+            try:validate_return_quantity(sold['quantity'],previous,requested)
+            except ValueError as error:raise ApiError(str(error),409,'return_quantity_conflict') from error
+            if line.fit_quantity:
+                db.inventory.update_one({'product_id':pid,'location_id':sale['location_id']},{'$inc':{'on_hand':line.fit_quantity,'available':line.fit_quantity},'$set':{'updated_at':now}},session=session)
+                db.inventory_movements.insert_one({'product_id':pid,'location_id':sale['location_id'],'type':'return_fit','quantity':line.fit_quantity,'source_type':'return','source_id':rid,'actor_id':actor_id,'occurred_at':now},session=session)
+            if line.damaged_quantity:
+                db.loss_events.insert_one({'product_id':pid,'location_id':sale['location_id'],'type':'damaged_return','quantity':line.damaged_quantity,'unit_cost':sold.get('unit_cost',Decimal128('0')),'source_id':rid,'reason':line.reason,'actor_id':actor_id,'occurred_at':now},session=session)
+            docs.append({'return_id':rid,'sale_id':sid,'product_id':pid,'fit_quantity':line.fit_quantity,'damaged_quantity':line.damaged_quantity,'reason':line.reason})
+        db.returns.insert_one({'_id':rid,'number':number,'sale_id':sid,'status':'confirmed','idempotency_key':key,'actor_id':actor_id,'created_at':now},session=session)
+        db.return_items.insert_many(docs,session=session)
+        db.sales.update_one({'_id':sid},{'$set':{'status':'partially_returned','updated_at':now}},session=session)
+    return {'id':str(rid),'number':number,'status':'confirmed'}
+
+
 def create_product(db, model):
     from backend.modules.core.repositories import insert_product
     try:

@@ -6,8 +6,8 @@ from backend.common.errors import ApiError
 from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
-from backend.modules.core.schemas import InventoryReceiptCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, SaleCreate, StockCountCreate
-from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_sale_draft, create_stock_count, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
+from backend.modules.core.schemas import InventoryReceiptCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, ReturnCreate, SaleCreate, StockCountCreate
+from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_return, create_sale_draft, create_stock_count, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
 
@@ -110,3 +110,11 @@ def stock_counts_approve(count_id):
 @require_permission('sales.write')
 def lost_sales_create():
     model=validate(LostSaleCreate,request.get_json(silent=True)); return jsonify({'data':{'id':record_lost_sale(get_db(),model,g.actor_id)}}),201
+
+
+@core_bp.post('/returns')
+@require_permission('returns.write')
+def returns_create():
+    key=request.headers.get('Idempotency-Key','').strip()
+    if not key:raise ApiError('Se requiere Idempotency-Key',400,'idempotency_key_required')
+    return jsonify({'data':create_return(get_db(),validate(ReturnCreate,request.get_json(silent=True)),key,g.actor_id)}),201

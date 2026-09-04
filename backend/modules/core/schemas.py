@@ -73,3 +73,15 @@ class LostSaleCreate(BaseModel):
     product_id: str = Field(min_length=24, max_length=24)
     requested_quantity: int = Field(gt=0)
     reason: str = Field(default="out_of_stock", max_length=80)
+
+
+class ReturnLine(BaseModel):
+    product_id: str = Field(min_length=24, max_length=24)
+    fit_quantity: int = Field(ge=0)
+    damaged_quantity: int = Field(ge=0)
+    reason: str = Field(min_length=3, max_length=300)
+
+
+class ReturnCreate(BaseModel):
+    sale_id: str = Field(min_length=24, max_length=24)
+    items: list[ReturnLine] = Field(min_length=1, max_length=200)

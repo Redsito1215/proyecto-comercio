@@ -67,19 +67,19 @@
 
 **Independent Test**: separar devuelto apto y dañado y comprobar destinos.
 
-- [ ] T036 [P] [US5] Escribir pruebas de límites en `tests/unit/test_return_limits.py`
-- [ ] T037 [P] [US5] Escribir integración en `tests/integration/test_return_transaction.py`
-- [ ] T038 [US5] Implementar devolución transaccional en `backend/modules/core/services.py`
-- [ ] T039 [US5] Exponer devolución en `backend/modules/core/routes.py`
-- [ ] T040 [P] [US5] Crear UI de devoluciones en `frontend/js/modules/core/returns.js`
+- [X] T036 [P] [US5] Escribir pruebas de límites en `tests/unit/test_return_limits.py`
+- [X] T037 [P] [US5] Escribir integración en `tests/integration/test_return_transaction.py`
+- [X] T038 [US5] Implementar devolución transaccional en `backend/modules/core/services.py`
+- [X] T039 [US5] Exponer devolución en `backend/modules/core/routes.py`
+- [X] T040 [P] [US5] Crear UI de devoluciones en `frontend/js/modules/core/returns.js`
 
 ## Phase 8: Polish and Quality Gates
 
 - [X] T041 [P] Aplicar diseño base de Altavia en `frontend/css/app.css`
 - [X] T042 [P] Añadir accesibilidad y responsividad en `frontend/css/app.css`
-- [ ] T043 Ejecutar pruebas y corregir regresiones documentadas en `tests/`
-- [ ] T044 Ejecutar escenarios de `specs/001-core-ventas-inventario/quickstart.md`
-- [ ] T045 Verificar trazabilidad FR→prueba en `specs/001-core-ventas-inventario/checklists/requirements.md`
+- [X] T043 Ejecutar pruebas y corregir regresiones documentadas en `tests/`
+- [X] T044 Ejecutar escenarios de `specs/001-core-ventas-inventario/quickstart.md`
+- [X] T045 Verificar trazabilidad FR→prueba en `specs/001-core-ventas-inventario/checklists/requirements.md`
 
 ## Dependencies
 
