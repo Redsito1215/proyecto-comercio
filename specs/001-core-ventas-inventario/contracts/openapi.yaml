@@ -1,0 +1,72 @@
+openapi: 3.1.0
+info:
+  title: Comercio Inteligente - Core API
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /products:
+    get:
+      summary: Buscar productos vigentes
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Productos con precio y disponibilidad }
+    post:
+      summary: Crear producto
+      responses:
+        '201': { description: Producto creado }
+  /inventory:
+    get:
+      summary: Consultar existencias, lotes y alertas
+      responses:
+        '200': { description: Inventario consultado }
+  /sales:
+    post:
+      summary: Crear borrador de venta
+      responses:
+        '201': { description: Venta creada }
+  /sales/{saleId}/confirm:
+    post:
+      summary: Confirmar venta de forma atómica
+      parameters:
+        - { name: saleId, in: path, required: true, schema: { type: string } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Venta confirmada }
+        '409': { description: Stock o versión en conflicto }
+  /purchase-orders:
+    post:
+      summary: Crear orden de compra
+      responses:
+        '201': { description: Orden creada }
+  /purchase-orders/{orderId}/receipts:
+    post:
+      summary: Registrar recepción total o parcial
+      parameters:
+        - { name: orderId, in: path, required: true, schema: { type: string } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
+      responses:
+        '201': { description: Recepción registrada }
+  /stock-counts:
+    post:
+      summary: Abrir conteo de inventario
+      responses:
+        '201': { description: Conteo abierto }
+  /stock-counts/{countId}/approve:
+    post:
+      summary: Aprobar diferencias y crear ajustes
+      parameters:
+        - { name: countId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Ajustes registrados }
+  /lost-sales:
+    post:
+      summary: Registrar demanda no atendida
+      responses:
+        '201': { description: Venta perdida registrada }
+  /returns:
+    post:
+      summary: Registrar devolución e inspección
+      responses:
+        '201': { description: Devolución registrada }
