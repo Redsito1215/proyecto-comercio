@@ -1,0 +1,12 @@
+openapi: 3.1.0
+info: {title: Comercio Inteligente - Promociones, version: 1.0.0}
+paths:
+  /api/v1/promotions:
+    get: {summary: Lista promociones, responses: {'200': {description: OK}}}
+    post: {summary: Crea borrador validado, responses: {'201': {description: Creada}, '409': {description: Margen insuficiente}}}
+  /api/v1/promotions/{id}/audience:
+    post: {summary: Prepara audiencia y grupo control, responses: {'200': {description: Preparada}}}
+  /api/v1/promotions/{id}/activate:
+    post: {summary: Activa y crea outbox para tratamiento, responses: {'200': {description: Activa}}}
+  /api/v1/promotions/{id}/metrics:
+    get: {summary: Mide resultado incremental, responses: {'200': {description: OK}}}
