@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info: {title: Comercio Inteligente - Pronóstico, version: 1.0.0}
+paths:
+  /api/v1/forecasts/runs:
+    post: {summary: Genera una corrida explicable, responses: {'201': {description: Creada}}}
+    get: {summary: Lista corridas, responses: {'200': {description: OK}}}
+  /api/v1/forecasts/latest:
+    get: {summary: Consulta el último pronóstico por producto, responses: {'200': {description: OK}}}
