@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/css/app.css">
   <script>const t=localStorage.getItem('ci-theme')||'light';document.documentElement.dataset.theme=t;document.documentElement.className='theme-'+t;</script>
   <script src="/js/shell.js" defer></script>
+  <script src="/js/modules/core/sales.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -73,6 +74,25 @@
           <div class="dashboard-grid">
             <section class="panel panel-wide"><div class="panel-head"><div><span class="eyebrow">Actividad</span><h2>Ventas recientes</h2></div><button class="btn btn-primary" data-go="ventas">Nueva venta</button></div><div class="empty-state"><span class="empty-mark">CI</span><h3>Aún no hay ventas</h3><p>Cuando confirmes la primera operación aparecerá aquí con su estado e importe.</p></div></section>
             <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Atención</span><h2>Señales prioritarias</h2></div></div><div class="signal-list"><div><span class="signal ok"></span><p><strong>MongoDB disponible</strong><small>Replica set operativo</small></p></div><div><span class="signal neutral"></span><p><strong>Sin alertas</strong><small>El inventario está vacío</small></p></div></div></aside>
+          </div>
+        </div>
+      </section>
+      <section class="page" id="page-ventas">
+        <div class="page-shell">
+          <div class="page-hero"><span class="page-badge">Operación rápida</span><h1 class="page-title">Nueva venta</h1><p class="page-lead">Busca por nombre, SKU o código de barras y confirma el cobro sin perder tiempo.</p></div>
+          <div class="sale-layout">
+            <section class="panel">
+              <div class="panel-head"><div><span class="eyebrow">Catálogo</span><h2>Seleccionar productos</h2></div><span class="source-chip"><span></span> Inventario en vivo</span></div>
+              <label class="sale-search"><span>Buscar producto</span><input id="sale-search" type="search" placeholder="Nombre, SKU o código de barras" autocomplete="off"></label>
+              <div class="product-results" id="product-results" aria-live="polite"><div class="empty-state"><span class="empty-mark">CI</span><h3>Escribe para buscar</h3><p>Los productos disponibles aparecerán aquí.</p></div></div>
+            </section>
+            <aside class="panel sale-cart">
+              <div class="panel-head"><div><span class="eyebrow">Venta actual</span><h2>Detalle</h2></div><span class="cart-count" id="cart-count">0</span></div>
+              <div id="cart-lines" class="cart-lines"><div class="empty-state compact"><p>Agrega productos para comenzar.</p></div></div>
+              <div class="sale-total"><span>Total</span><strong id="sale-total">$0,00</strong></div>
+              <button class="btn btn-primary sale-confirm" id="confirm-sale" type="button" disabled>Confirmar venta</button>
+              <p class="form-message" id="sale-message" role="status"></p>
+            </aside>
           </div>
         </div>
       </section>

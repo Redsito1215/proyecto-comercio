@@ -15,9 +15,10 @@ document.querySelectorAll('.nav-folder-toggle').forEach(button => button.addEven
 function showPage(name, label) {
   document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.page === name));
   const home = document.getElementById('page-inicio');
+  const dedicated = document.getElementById(`page-${name}`);
   const placeholder = document.getElementById('page-placeholder');
-  home.classList.toggle('page-active', name === 'inicio');
-  placeholder.classList.toggle('page-active', name !== 'inicio');
+  document.querySelectorAll('.page').forEach(page => page.classList.remove('page-active'));
+  (dedicated || placeholder).classList.add('page-active');
   document.getElementById('placeholder-title').textContent = label;
   document.getElementById('topbar-title').textContent = label;
   closeMobileMenu();

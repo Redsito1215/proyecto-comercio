@@ -18,3 +18,4 @@ def ensure_indexes(db):
         IndexModel([("product_id", ASCENDING), ("occurred_at", DESCENDING)]),
         IndexModel([("source_type", ASCENDING), ("source_id", ASCENDING)]),
     ])
+    db.sale_items.create_index([("sale_id", ASCENDING), ("product_id", ASCENDING)])

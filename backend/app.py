@@ -6,6 +6,7 @@ from backend.common.errors import register_error_handlers
 from backend.config import get_settings
 from backend.db import get_db, ping
 from backend.modules.core.indexes import ensure_indexes
+from backend.modules.core.routes import core_bp
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -13,6 +14,7 @@ def create_app(testing: bool = False) -> Flask:
     app = Flask(__name__, static_folder=str(frontend), static_url_path="")
     app.config.update(TESTING=testing, SECRET_KEY=get_settings().flask_secret_key)
     register_error_handlers(app)
+    app.register_blueprint(core_bp)
 
     @app.get("/api/v1/health")
     def health():

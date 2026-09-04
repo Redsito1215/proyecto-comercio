@@ -25,14 +25,14 @@
 
 **Independent Test**: vender dos productos y verificar un único descuento de inventario.
 
-- [ ] T014 [P] [US1] Escribir contrato de productos/ventas en `tests/contract/test_sales_api.py`
-- [ ] T015 [P] [US1] Escribir concurrencia e idempotencia en `tests/integration/test_sale_transaction.py`
-- [ ] T016 [P] [US1] Implementar esquemas de venta en `backend/modules/core/schemas.py`
-- [ ] T017 [US1] Implementar repositorios de producto y venta en `backend/modules/core/repositories.py`
-- [ ] T018 [US1] Implementar confirmación transaccional en `backend/modules/core/services.py`
-- [ ] T019 [US1] Exponer productos y ventas en `backend/modules/core/routes.py`
-- [ ] T020 [P] [US1] Crear pantalla de venta rápida en `frontend/js/modules/core/sales.js`
-- [ ] T021 [US1] Integrar venta rápida en `frontend/index.html`
+- [X] T014 [P] [US1] Escribir contrato de productos/ventas en `tests/contract/test_sales_api.py`
+- [X] T015 [P] [US1] Escribir concurrencia e idempotencia en `tests/integration/test_sale_transaction.py`
+- [X] T016 [P] [US1] Implementar esquemas de venta en `backend/modules/core/schemas.py`
+- [X] T017 [US1] Implementar repositorios de producto y venta en `backend/modules/core/repositories.py`
+- [X] T018 [US1] Implementar confirmación transaccional en `backend/modules/core/services.py`
+- [X] T019 [US1] Exponer productos y ventas en `backend/modules/core/routes.py`
+- [X] T020 [P] [US1] Crear pantalla de venta rápida en `frontend/js/modules/core/sales.js`
+- [X] T021 [US1] Integrar venta rápida en `frontend/index.html`
 
 ## Phase 4: User Story 2 - Inventario por lote (P1)
 
