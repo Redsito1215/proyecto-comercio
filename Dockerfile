@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
 COPY frontend ./frontend
 COPY tests ./tests
+COPY scripts ./scripts
 COPY pytest.ini .
 
 EXPOSE 5001

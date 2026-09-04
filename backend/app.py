@@ -21,6 +21,8 @@ from backend.modules.security.indexes import ensure_security_indexes
 from backend.modules.security.routes import security_bp
 from backend.modules.payments.indexes import ensure_payment_indexes
 from backend.modules.payments.routes import payments_bp
+from backend.modules.reports.indexes import ensure_report_indexes
+from backend.modules.reports.routes import reports_bp
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -36,6 +38,7 @@ def create_app(testing: bool = False) -> Flask:
     app.register_blueprint(controls_bp)
     app.register_blueprint(security_bp)
     app.register_blueprint(payments_bp)
+    app.register_blueprint(reports_bp)
 
     @app.after_request
     def security_headers(response):
@@ -63,6 +66,7 @@ def create_app(testing: bool = False) -> Flask:
         ensure_control_indexes(get_db())
         ensure_security_indexes(get_db())
         ensure_payment_indexes(get_db())
+        ensure_report_indexes(get_db())
     return app
 
 

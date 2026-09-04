@@ -39,6 +39,59 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    volumes:
+      - ./output/pdf:/app/output/pdf
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.12
+    profiles: ["analytics"]
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: comercio_analytics
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./analytics/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  airflow:
+    build: ./analytics/airflow
+    profiles: ["analytics"]
+    command: standalone
+    ports:
+      - "8088:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
+      MONGO_DB: comercio_inteligente
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_DATABASE: comercio_analytics
+    volumes:
+      - airflow_data:/opt/airflow
+      - ./analytics/airflow/dags:/opt/airflow/dags:ro
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
+
+  seed:
+    build: .
+    profiles: ["tools"]
+    env_file: [.env]
+    command: ["python", "-m", "scripts.seed_demo"]
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
 
 volumes:
   mongo_data:
+  clickhouse_data:
+  airflow_data:

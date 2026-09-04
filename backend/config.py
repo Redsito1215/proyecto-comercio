@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     mongo_db: str = "comercio_inteligente"
     app_host: str = "0.0.0.0"
     app_port: int = 5001
+    clickhouse_host: str = "clickhouse"
+    clickhouse_port: int = 8123
+    clickhouse_database: str = "comercio_analytics"
 
 
 @lru_cache
