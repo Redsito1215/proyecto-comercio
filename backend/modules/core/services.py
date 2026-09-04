@@ -66,6 +66,47 @@ def inventory_snapshot(db):
     return rows
 
 
+def create_purchase_order(db, model, actor_id: str):
+    now = datetime.now(UTC); total = Decimal("0"); prepared = []
+    for line in model.items:
+        if not ObjectId.is_valid(line.product_id) or not db.products.find_one({"_id": ObjectId(line.product_id), "active": True}):
+            raise ApiError("Producto no encontrado", 404, "product_not_found")
+        total += line.unit_cost * line.quantity
+        prepared.append({"product_id":ObjectId(line.product_id),"ordered_quantity":line.quantity,"received_quantity":0,"pending_quantity":line.quantity,"unit_cost":Decimal128(line.unit_cost)})
+    number = next_number(db, "purchase_orders", "OC")
+    order_id = db.purchase_orders.insert_one({"number":number,"supplier_name":model.supplier_name,"location_id":model.location_id,"status":"sent","total":Decimal128(total),"actor_id":actor_id,"created_at":now,"updated_at":now}).inserted_id
+    db.purchase_order_items.insert_many([{**item,"purchase_order_id":order_id} for item in prepared])
+    return {"id":str(order_id),"number":number,"status":"sent","total":str(total)}
+
+
+def receive_purchase_order(db, order_id: str, model, key: str, actor_id: str):
+    if not ObjectId.is_valid(order_id): raise ApiError("Orden no encontrada",404,"order_not_found")
+    prior = db.inventory_movements.find_one({"idempotency_key":key})
+    if prior: return {"id":order_id,"status":"received"}
+    oid=ObjectId(order_id)
+    with transaction() as session:
+        order=db.purchase_orders.find_one({"_id":oid,"status":{"$in":["sent","partially_received"]}},session=session)
+        if not order: raise ApiError("Orden no disponible para recepción",409,"order_state_conflict")
+        now=datetime.now(UTC)
+        for line in model.items:
+            pid=ObjectId(line.product_id) if ObjectId.is_valid(line.product_id) else None
+            item=db.purchase_order_items.find_one({"purchase_order_id":oid,"product_id":pid,"pending_quantity":{"$gte":line.quantity}},session=session)
+            if not item: raise ApiError("Cantidad recibida supera lo pendiente",409,"receipt_quantity_conflict")
+            expiry=datetime.fromisoformat(line.expires_at).replace(tzinfo=UTC) if line.expires_at else None
+            lot=db.lots.find_one_and_update({"product_id":pid,"location_id":order["location_id"],"lot_number":line.lot_number},{"$setOnInsert":{"created_at":now,"status":"available","expires_at":expiry},"$set":{"unit_cost":Decimal128(line.unit_cost),"updated_at":now},"$inc":{"quantity":line.quantity,"available_quantity":line.quantity}},upsert=True,return_document=True,session=session)
+            db.inventory.update_one({"product_id":pid,"location_id":order["location_id"]},{"$setOnInsert":{"reserved":0,"created_at":now},"$set":{"average_cost":Decimal128(line.unit_cost),"updated_at":now},"$inc":{"on_hand":line.quantity,"available":line.quantity}},upsert=True,session=session)
+            db.purchase_order_items.update_one({"_id":item["_id"]},{"$inc":{"received_quantity":line.quantity,"pending_quantity":-line.quantity}},session=session)
+            db.inventory_movements.insert_one({"product_id":pid,"location_id":order["location_id"],"lot_id":lot["_id"],"type":"receipt","quantity":line.quantity,"unit_cost":Decimal128(line.unit_cost),"source_type":"purchase_order","source_id":oid,"idempotency_key":key,"actor_id":actor_id,"occurred_at":now},session=session)
+        pending=db.purchase_order_items.count_documents({"purchase_order_id":oid,"pending_quantity":{"$gt":0}},session=session)
+        status="partially_received" if pending else "received"
+        db.purchase_orders.update_one({"_id":oid},{"$set":{"status":status,"updated_at":now}},session=session)
+    return {"id":order_id,"status":status}
+
+
+def list_purchase_orders(db):
+    return [{**to_json(row),"id":str(row["_id"])} for row in db.purchase_orders.find().sort("created_at",-1).limit(100)]
+
+
 def create_product(db, model):
     from backend.modules.core.repositories import insert_product
     try:

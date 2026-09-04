@@ -48,11 +48,11 @@
 
 **Independent Test**: recibir parcialmente una orden y conciliar su saldo.
 
-- [ ] T027 [P] [US3] Escribir contrato de compras en `tests/contract/test_purchases_api.py`
-- [ ] T028 [P] [US3] Escribir integración parcial en `tests/integration/test_partial_receipt.py`
-- [ ] T029 [US3] Implementar órdenes, cobertura y recepción en `backend/modules/core/services.py`
-- [ ] T030 [US3] Exponer compras en `backend/modules/core/routes.py`
-- [ ] T031 [P] [US3] Crear UI de compras en `frontend/js/modules/core/purchases.js`
+- [X] T027 [P] [US3] Escribir contrato de compras en `tests/contract/test_purchases_api.py`
+- [X] T028 [P] [US3] Escribir integración parcial en `tests/integration/test_partial_receipt.py`
+- [X] T029 [US3] Implementar órdenes, cobertura y recepción en `backend/modules/core/services.py`
+- [X] T030 [US3] Exponer compras en `backend/modules/core/routes.py`
+- [X] T031 [P] [US3] Crear UI de compras en `frontend/js/modules/core/purchases.js`
 
 ## Phase 6: User Story 4 - Conteos y ventas perdidas (P2)
 

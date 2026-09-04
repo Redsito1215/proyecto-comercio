@@ -6,8 +6,8 @@ from backend.common.errors import ApiError
 from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
-from backend.modules.core.schemas import InventoryReceiptCreate, ProductCreate, SaleCreate
-from backend.modules.core.services import confirm_sale, create_sale_draft, inventory_snapshot, receive_inventory, serialize_product
+from backend.modules.core.schemas import InventoryReceiptCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, SaleCreate
+from backend.modules.core.services import confirm_sale, create_purchase_order, create_sale_draft, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
 
@@ -70,3 +70,25 @@ def inventory_receive():
         raise ApiError("Se requiere Idempotency-Key", 400, "idempotency_key_required")
     model = validate(InventoryReceiptCreate, request.get_json(silent=True))
     return jsonify({"data": receive_inventory(get_db(), model, key, g.actor_id)}), 201
+
+
+@core_bp.get("/purchase-orders")
+@require_permission("purchases.read")
+def purchase_orders_list():
+    return jsonify({"data": list_purchase_orders(get_db())})
+
+
+@core_bp.post("/purchase-orders")
+@require_permission("purchases.write")
+def purchase_orders_create():
+    model=validate(PurchaseOrderCreate,request.get_json(silent=True))
+    return jsonify({"data":create_purchase_order(get_db(),model,g.actor_id)}),201
+
+
+@core_bp.post("/purchase-orders/<order_id>/receipts")
+@require_permission("purchases.receive")
+def purchase_orders_receive(order_id):
+    key=request.headers.get("Idempotency-Key","").strip()
+    if not key: raise ApiError("Se requiere Idempotency-Key",400,"idempotency_key_required")
+    model=validate(PurchaseReceiptCreate,request.get_json(silent=True))
+    return jsonify({"data":receive_purchase_order(get_db(),order_id,model,key,g.actor_id)}),201

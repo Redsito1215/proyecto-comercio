@@ -40,3 +40,19 @@ class ReceiptLine(BaseModel):
 class InventoryReceiptCreate(BaseModel):
     location_id: str = Field(default="main", min_length=1, max_length=60)
     items: list[ReceiptLine] = Field(min_length=1, max_length=500)
+
+
+class PurchaseOrderLine(BaseModel):
+    product_id: str = Field(min_length=24, max_length=24)
+    quantity: int = Field(gt=0, le=1000000)
+    unit_cost: Decimal = Field(ge=0, decimal_places=2)
+
+
+class PurchaseOrderCreate(BaseModel):
+    supplier_name: str = Field(min_length=2, max_length=160)
+    location_id: str = Field(default="main", min_length=1, max_length=60)
+    items: list[PurchaseOrderLine] = Field(min_length=1, max_length=500)
+
+
+class PurchaseReceiptCreate(BaseModel):
+    items: list[ReceiptLine] = Field(min_length=1, max_length=500)
