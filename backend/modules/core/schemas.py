@@ -27,3 +27,16 @@ class SaleCreate(BaseModel):
     location_id: str = Field(default="main", min_length=1, max_length=60)
     customer_id: str | None = None
     items: list[SaleLineCreate] = Field(min_length=1, max_length=200)
+
+
+class ReceiptLine(BaseModel):
+    product_id: str = Field(min_length=24, max_length=24)
+    lot_number: str = Field(min_length=1, max_length=80)
+    quantity: int = Field(gt=0, le=1000000)
+    unit_cost: Decimal = Field(ge=0, decimal_places=2)
+    expires_at: str | None = None
+
+
+class InventoryReceiptCreate(BaseModel):
+    location_id: str = Field(default="main", min_length=1, max_length=60)
+    items: list[ReceiptLine] = Field(min_length=1, max_length=500)

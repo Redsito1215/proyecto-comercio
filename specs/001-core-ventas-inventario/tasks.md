@@ -38,11 +38,11 @@
 
 **Independent Test**: recibir dos lotes y comprobar salida FEFO y alertas.
 
-- [ ] T022 [P] [US2] Escribir pruebas FEFO en `tests/unit/test_lot_allocation.py`
-- [ ] T023 [P] [US2] Escribir integración de recepción en `tests/integration/test_inventory_receipt.py`
-- [ ] T024 [US2] Implementar lotes, movimientos y alertas en `backend/modules/core/services.py`
-- [ ] T025 [US2] Exponer inventario y alertas en `backend/modules/core/routes.py`
-- [ ] T026 [P] [US2] Crear inventario visual en `frontend/js/modules/core/inventory.js`
+- [X] T022 [P] [US2] Escribir pruebas FEFO en `tests/unit/test_lot_allocation.py`
+- [X] T023 [P] [US2] Escribir integración de recepción en `tests/integration/test_inventory_receipt.py`
+- [X] T024 [US2] Implementar lotes, movimientos y alertas en `backend/modules/core/services.py`
+- [X] T025 [US2] Exponer inventario y alertas en `backend/modules/core/routes.py`
+- [X] T026 [P] [US2] Crear inventario visual en `frontend/js/modules/core/inventory.js`
 
 ## Phase 5: User Story 3 - Reposición (P2)
 

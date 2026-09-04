@@ -10,6 +10,62 @@ from backend.db import transaction
 from backend.modules.core.repositories import get_sale, next_number
 
 
+def allocate_lot_quantities(lots: list[dict], quantity: int) -> list[dict]:
+    ordered = sorted(lots, key=lambda lot: (lot.get("expires_at") is None, lot.get("expires_at") or "9999-12-31"))
+    remaining, allocations = quantity, []
+    for lot in ordered:
+        take = min(remaining, lot["available_quantity"])
+        if take:
+            allocations.append({"lot_id": lot["_id"], "quantity": take})
+            remaining -= take
+        if remaining == 0:
+            return allocations
+    raise ValueError("Existencia por lote insuficiente")
+
+
+def receive_inventory(db, model, idempotency_key: str, actor_id: str):
+    prior = db.inventory_movements.find_one({"idempotency_key": idempotency_key})
+    if prior:
+        return {"idempotency_key": idempotency_key, "status": "received"}
+    with transaction() as session:
+        now = datetime.now(UTC)
+        for line in model.items:
+            if not ObjectId.is_valid(line.product_id):
+                raise ApiError("Producto inválido", 422, "validation_error")
+            product_id = ObjectId(line.product_id)
+            if not db.products.find_one({"_id": product_id, "active": True}, session=session):
+                raise ApiError("Producto no encontrado", 404, "product_not_found")
+            expiry = datetime.fromisoformat(line.expires_at).replace(tzinfo=UTC) if line.expires_at else None
+            lot = db.lots.find_one_and_update(
+                {"product_id": product_id, "location_id": model.location_id, "lot_number": line.lot_number},
+                {"$setOnInsert": {"created_at": now, "status": "available", "expires_at": expiry},
+                 "$set": {"unit_cost": Decimal128(line.unit_cost), "updated_at": now},
+                 "$inc": {"quantity": line.quantity, "available_quantity": line.quantity}},
+                upsert=True, return_document=True, session=session,
+            )
+            db.inventory.update_one(
+                {"product_id": product_id, "location_id": model.location_id},
+                {"$setOnInsert": {"reserved": 0, "created_at": now}, "$set": {"average_cost": Decimal128(line.unit_cost), "updated_at": now},
+                 "$inc": {"on_hand": line.quantity, "available": line.quantity}}, upsert=True, session=session,
+            )
+            db.inventory_movements.insert_one({
+                "product_id": product_id, "location_id": model.location_id, "lot_id": lot["_id"], "type": "receipt",
+                "quantity": line.quantity, "unit_cost": Decimal128(line.unit_cost), "source_type": "receipt",
+                "idempotency_key": idempotency_key, "actor_id": actor_id, "occurred_at": now,
+            }, session=session)
+    return {"idempotency_key": idempotency_key, "status": "received"}
+
+
+def inventory_snapshot(db):
+    now = datetime.now(UTC)
+    rows = []
+    for stock in db.inventory.find().sort("updated_at", -1):
+        product = db.products.find_one({"_id": stock["product_id"]}) or {}
+        expiring = db.lots.count_documents({"product_id": stock["product_id"], "location_id": stock["location_id"], "status": "available", "expires_at": {"$gte": now, "$lte": now.replace(year=now.year + 1)}})
+        rows.append({**to_json(stock), "id": str(stock["_id"]), "product_name": product.get("name", "Producto"), "sku": product.get("sku", ""), "expiring_lots": expiring})
+    return rows
+
+
 def create_product(db, model):
     from backend.modules.core.repositories import insert_product
     try:
@@ -63,6 +119,14 @@ def confirm_sale(db, sale_id: str, idempotency_key: str, actor_id: str):
             raise ApiError("La venta ya no está disponible para confirmar", 409, "sale_state_conflict")
         now = datetime.now(UTC)
         for item in sale["items"]:
+            product = db.products.find_one({"_id": item["product_id"]}, session=session) or {}
+            allocations = []
+            if product.get("perishable"):
+                lots = list(db.lots.find({"product_id": item["product_id"], "location_id": sale["location_id"], "status": "available", "available_quantity": {"$gt": 0}}).sort("expires_at", 1))
+                try:
+                    allocations = allocate_lot_quantities(lots, item["quantity"])
+                except ValueError as error:
+                    raise ApiError(str(error), 409, "insufficient_lot_stock") from error
             result = db.inventory.update_one(
                 {"product_id": item["product_id"], "location_id": sale["location_id"],
                  "available": {"$gte": item["quantity"]}},
@@ -71,6 +135,8 @@ def confirm_sale(db, sale_id: str, idempotency_key: str, actor_id: str):
             )
             if result.modified_count != 1:
                 raise ApiError(f"Stock insuficiente para {item['name']}", 409, "insufficient_stock")
+            for allocation in allocations:
+                db.lots.update_one({"_id": allocation["lot_id"]}, {"$inc": {"available_quantity": -allocation["quantity"]}}, session=session)
             db.inventory_movements.insert_one({
                 "product_id": item["product_id"], "location_id": sale["location_id"],
                 "type": "sale", "quantity": -item["quantity"], "unit_cost": item["unit_cost"],

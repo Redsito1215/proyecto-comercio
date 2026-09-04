@@ -6,8 +6,8 @@ from backend.common.errors import ApiError
 from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
-from backend.modules.core.schemas import ProductCreate, SaleCreate
-from backend.modules.core.services import confirm_sale, create_sale_draft, serialize_product
+from backend.modules.core.schemas import InventoryReceiptCreate, ProductCreate, SaleCreate
+from backend.modules.core.services import confirm_sale, create_sale_draft, inventory_snapshot, receive_inventory, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
 
@@ -54,3 +54,19 @@ def sales_confirm(sale_id):
     if not key:
         raise ApiError("Se requiere Idempotency-Key", 400, "idempotency_key_required")
     return jsonify({"data": confirm_sale(get_db(), sale_id, key, g.actor_id)})
+
+
+@core_bp.get("/inventory")
+@require_permission("inventory.read")
+def inventory_list():
+    return jsonify({"data": inventory_snapshot(get_db())})
+
+
+@core_bp.post("/inventory/receipts")
+@require_permission("inventory.receive")
+def inventory_receive():
+    key = request.headers.get("Idempotency-Key", "").strip()
+    if not key:
+        raise ApiError("Se requiere Idempotency-Key", 400, "idempotency_key_required")
+    model = validate(InventoryReceiptCreate, request.get_json(silent=True))
+    return jsonify({"data": receive_inventory(get_db(), model, key, g.actor_id)}), 201
