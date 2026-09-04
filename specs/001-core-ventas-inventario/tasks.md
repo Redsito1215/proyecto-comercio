@@ -75,8 +75,8 @@
 
 ## Phase 8: Polish and Quality Gates
 
-- [ ] T041 [P] Aplicar diseño base de Altavia en `frontend/css/app.css`
-- [ ] T042 [P] Añadir accesibilidad y responsividad en `frontend/css/app.css`
+- [X] T041 [P] Aplicar diseño base de Altavia en `frontend/css/app.css`
+- [X] T042 [P] Añadir accesibilidad y responsividad en `frontend/css/app.css`
 - [ ] T043 Ejecutar pruebas y corregir regresiones documentadas en `tests/`
 - [ ] T044 Ejecutar escenarios de `specs/001-core-ventas-inventario/quickstart.md`
 - [ ] T045 Verificar trazabilidad FR→prueba en `specs/001-core-ventas-inventario/checklists/requirements.md`

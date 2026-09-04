@@ -1,19 +1,83 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" data-theme="light" class="theme-light">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comercio Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/globtrade-theme.css">
+  <link rel="stylesheet" href="/css/page-unified.css">
+  <link rel="stylesheet" href="/css/theme-normalize.css">
+  <link rel="stylesheet" href="/css/accessibility.css">
   <link rel="stylesheet" href="/css/app.css">
+  <script>const t=localStorage.getItem('ci-theme')||'light';document.documentElement.dataset.theme=t;document.documentElement.className='theme-'+t;</script>
+  <script src="/js/shell.js" defer></script>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="brand">Comercio Inteligente</div>
-    <nav><a class="active" href="#inicio">Inicio</a><a href="#ventas">Ventas</a><a href="#inventario">Inventario</a></nav>
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="logo logo--rail">
+      <button class="sidebar-burger" id="sidebar-burger" type="button" aria-label="Ocultar menú" aria-expanded="true">
+        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+      </button>
+      <div class="logo-text"><div class="logo-mark"><span class="ci-logo">CI</span><span class="logo-wordmark">COMERCIO INTELIGENTE</span></div></div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Menú principal">
+      <div class="nav-block nav-folder is-open">
+        <button class="nav-folder-toggle" type="button" aria-expanded="true"><span class="nav-section-label nav-section-label--toggle">Operativo</span><span class="nav-folder-chevron"></span></button>
+        <div class="nav-folder-body">
+          <button class="nav-item active" data-page="inicio"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg></span><span class="nav-label">Resumen</span></button>
+          <button class="nav-item" data-page="ventas"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h10v14H5zM7 7h6M7 10h6M7 13h4"/></svg></span><span class="nav-label">Ventas</span></button>
+          <button class="nav-item" data-page="inventario"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14v3H3zM5 8v8h10V8M8 11h4"/></svg></span><span class="nav-label">Inventario y compras</span></button>
+          <button class="nav-item" data-page="caja"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h14v11H3zM3 8h14M13 12h2"/></svg></span><span class="nav-label">Caja y pagos</span></button>
+        </div>
+      </div>
+      <div class="nav-block nav-folder">
+        <button class="nav-folder-toggle" type="button" aria-expanded="false"><span class="nav-section-label nav-section-label--toggle">Inteligencia</span><span class="nav-folder-chevron"></span></button>
+        <div class="nav-folder-body">
+          <button class="nav-item" data-page="clientes"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="6" r="3"/><path d="M4 17c.5-4 2.5-6 6-6s5.5 2 6 6"/></svg></span><span class="nav-label">Clientes</span></button>
+          <button class="nav-item" data-page="precios"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10l7-7h6v6l-7 7-6-6z"/><circle cx="13" cy="6" r="1"/></svg></span><span class="nav-label">Precios y márgenes</span></button>
+          <button class="nav-item" data-page="pronostico"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 15l4-5 4 3 6-8M2 17h16"/></svg></span><span class="nav-label">Pronóstico</span></button>
+          <button class="nav-item" data-page="promociones"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10h14M10 3v14M5 5l10 10M15 5L5 15"/></svg></span><span class="nav-label">Promociones</span></button>
+        </div>
+      </div>
+      <div class="nav-block nav-folder">
+        <button class="nav-folder-toggle" type="button" aria-expanded="false"><span class="nav-section-label nav-section-label--toggle">Gestión</span><span class="nav-folder-chevron"></span></button>
+        <div class="nav-folder-body">
+          <button class="nav-item" data-page="informes"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3h8l2 2v12H5zM7 8h6M7 11h6M7 14h4"/></svg></span><span class="nav-label">Informes</span></button>
+          <button class="nav-item" data-page="seguridad"><span class="nav-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2l6 3v5c0 4-2.5 6.5-6 8-3.5-1.5-6-4-6-8V5l6-3z"/></svg></span><span class="nav-label">Seguridad</span></button>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-foot"><span class="live-indicator"></span><div><strong>Entorno local</strong><small>MongoDB conectado</small></div></div>
   </aside>
-  <main class="content">
-    <header><div><small>Operativo</small><h1>Resumen del comercio</h1></div><span class="status">Sistema local</span></header>
-    <section class="hero"><h2>Base del proyecto preparada</h2><p>MongoDB, Docker y el backend están listos para implementar la venta rápida.</p></section>
-  </main>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left"><button class="mobile-menu" id="mobile-menu" aria-label="Abrir menú">☰</button><div><span class="topbar-kicker">Plataforma comercial</span><strong id="topbar-title">Resumen</strong></div></div>
+      <div class="topbar-actions"><span class="source-chip"><span></span> Datos operativos</span><button class="icon-btn" id="theme-toggle" type="button" aria-label="Cambiar tema"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="4"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2M3.6 3.6L5 5M15 15l1.4 1.4M16.4 3.6L15 5M5 15l-1.4 1.4"/></svg></button><div class="user-chip"><span class="avatar">AD</span><div><strong>Administrador</strong><small>Control total</small></div></div></div>
+    </header>
+    <main class="content" id="main-content">
+      <section class="page page-active" id="page-inicio">
+        <div class="page-shell">
+          <div class="page-hero"><span class="page-badge">Vista operativa</span><h1 class="page-title">El comercio, bajo control</h1><p class="page-lead">Ventas, inventario, clientes y decisiones en una sola plataforma.</p></div>
+          <div class="metric-grid">
+            <article class="metric-card"><span>Ventas de hoy</span><strong>$0,00</strong><small>Sin operaciones registradas</small></article>
+            <article class="metric-card"><span>Productos activos</span><strong>0</strong><small>Catálogo por configurar</small></article>
+            <article class="metric-card"><span>Stock bajo</span><strong>0</strong><small>Sin alertas pendientes</small></article>
+            <article class="metric-card"><span>Margen promedio</span><strong>—</strong><small>Esperando datos de costo</small></article>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel panel-wide"><div class="panel-head"><div><span class="eyebrow">Actividad</span><h2>Ventas recientes</h2></div><button class="btn btn-primary" data-go="ventas">Nueva venta</button></div><div class="empty-state"><span class="empty-mark">CI</span><h3>Aún no hay ventas</h3><p>Cuando confirmes la primera operación aparecerá aquí con su estado e importe.</p></div></section>
+            <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Atención</span><h2>Señales prioritarias</h2></div></div><div class="signal-list"><div><span class="signal ok"></span><p><strong>MongoDB disponible</strong><small>Replica set operativo</small></p></div><div><span class="signal neutral"></span><p><strong>Sin alertas</strong><small>El inventario está vacío</small></p></div></div></aside>
+          </div>
+        </div>
+      </section>
+      <section class="page" id="page-placeholder"><div class="page-shell"><div class="page-hero"><span class="page-badge">Módulo planificado</span><h1 class="page-title" id="placeholder-title">Módulo</h1><p class="page-lead">Esta sección se implementará siguiendo su especificación de Spec Kit.</p></div><div class="panel"><div class="empty-state"><span class="empty-mark">CI</span><h3>Preparado para implementación</h3><p>La navegación y el diseño ya forman parte del sistema base.</p></div></div></div></section>
+    </main>
+  </div>
 </body>
 </html>
