@@ -15,6 +15,8 @@ from backend.modules.forecasting.indexes import ensure_forecast_indexes
 from backend.modules.forecasting.routes import forecasting_bp
 from backend.modules.promotions.indexes import ensure_promotion_indexes
 from backend.modules.promotions.routes import promotions_bp
+from backend.modules.controls.indexes import ensure_control_indexes
+from backend.modules.controls.routes import controls_bp
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -27,6 +29,7 @@ def create_app(testing: bool = False) -> Flask:
     app.register_blueprint(pricing_bp)
     app.register_blueprint(forecasting_bp)
     app.register_blueprint(promotions_bp)
+    app.register_blueprint(controls_bp)
 
     @app.get("/api/v1/health")
     def health():
@@ -42,6 +45,7 @@ def create_app(testing: bool = False) -> Flask:
         ensure_pricing_indexes(get_db())
         ensure_forecast_indexes(get_db())
         ensure_promotion_indexes(get_db())
+        ensure_control_indexes(get_db())
     return app
 
 
