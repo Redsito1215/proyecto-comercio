@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info: {title: Comercio Inteligente - Clientes API, version: 1.0.0}
+paths:
+  /api/v1/customers:
+    get: {summary: Buscar clientes, responses: {'200': {description: Lista}}}
+    post: {summary: Crear cliente, responses: {'201': {description: Creado}}}
+  /api/v1/customers/{id}:
+    get: {summary: Consultar perfil consolidado, responses: {'200': {description: Perfil}}}
+  /api/v1/customers/{id}/consents:
+    post: {summary: Registrar o revocar consentimiento, responses: {'201': {description: Registrado}}}
+  /api/v1/customers/recalculate:
+    post: {summary: Recalcular métricas y señales explicables, responses: {'200': {description: Calculado}}}
+  /api/v1/customers/{id}/birthday-coupon:
+    post: {summary: Emitir cupón elegible, responses: {'201': {description: Emitido}}}

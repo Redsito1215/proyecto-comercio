@@ -19,6 +19,7 @@
   <script src="/js/modules/core/purchases.js" defer></script>
   <script src="/js/modules/core/counts.js" defer></script>
   <script src="/js/modules/core/returns.js" defer></script>
+  <script src="/js/modules/customers/customers.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -110,6 +111,7 @@
         </div>
       </section>
       <section class="page" id="page-devoluciones"><div class="page-shell"><div class="page-hero"><span class="page-badge">Trazabilidad comercial</span><h1 class="page-title">Registrar devolución</h1><p class="page-lead">Reintegra solo mercancía apta y registra el producto dañado como merma.</p></div><section class="panel"><form id="return-form" class="return-form"><label>Id. de venta<input name="sale_id" required minlength="24" maxlength="24"></label><label>Id. de producto<input name="product_id" required minlength="24" maxlength="24"></label><label>Cantidad apta<input name="fit_quantity" type="number" min="0" value="0"></label><label>Cantidad dañada<input name="damaged_quantity" type="number" min="0" value="0"></label><label class="wide">Motivo<input name="reason" required value="Devolución del cliente"></label><button class="btn btn-primary" type="submit">Confirmar devolución</button></form><p id="return-message" class="form-message"></p></section></div></section>
+      <section class="page" id="page-clientes"><div class="page-shell"><div class="page-hero"><span class="page-badge">Fidelización explicable</span><h1 class="page-title">Clientes</h1><p class="page-lead">Recurrencia, rentabilidad, consentimiento y señales de abandono en un solo perfil.</p></div><div class="customer-layout"><section class="panel"><div class="panel-head"><div><span class="eyebrow">Directorio</span><h2>Clientes registrados</h2></div></div><form id="customer-form" class="customer-form"><input name="name" required placeholder="Nombre completo"><input name="email" type="email" placeholder="Correo"><input name="birthday" type="date"><button class="btn btn-primary">Crear cliente</button></form><p id="customer-message" class="form-message"></p><div id="customer-list" class="customer-list"></div></section><aside class="panel"><div class="panel-head"><div><span class="eyebrow">Perfil</span><h2 id="customer-profile-name">Selecciona un cliente</h2></div></div><div id="customer-profile" class="empty-state compact"><p>Consulta valor, frecuencia y riesgo individual.</p></div></aside></div></div></section>
       <section class="page" id="page-placeholder"><div class="page-shell"><div class="page-hero"><span class="page-badge">Módulo planificado</span><h1 class="page-title" id="placeholder-title">Módulo</h1><p class="page-lead">Esta sección se implementará siguiendo su especificación de Spec Kit.</p></div><div class="panel"><div class="empty-state"><span class="empty-mark">CI</span><h3>Preparado para implementación</h3><p>La navegación y el diseño ya forman parte del sistema base.</p></div></div></div></section>
     </main>
   </div>
