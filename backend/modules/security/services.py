@@ -81,8 +81,16 @@ def logout(db,raw_token,actor):
     return {"status":"revoked"}
 
 
-def audit_log(db):
-    return [to_json({**x,"id":str(x["_id"])}) for x in db.audit_events.find().sort("occurred_at",-1).limit(200)]
+def audit_log(db,action="",outcome="",actor="",date_from=None,date_to=None):
+    query={}
+    if action:query["action"]={"$regex":action,"$options":"i"}
+    if outcome:query["outcome"]=outcome
+    if actor:query["actor_id"]={"$regex":actor,"$options":"i"}
+    dates={}
+    if date_from:dates["$gte"]=date_from
+    if date_to:dates["$lte"]=date_to
+    if dates:query["occurred_at"]=dates
+    return [to_json({**x,"id":str(x["_id"])}) for x in db.audit_events.find(query).sort("occurred_at",-1).limit(1000)]
 
 
 def list_users(db):
@@ -91,6 +99,16 @@ def list_users(db):
 
 def list_roles(db):
     return [to_json({**x,"id":str(x["_id"])}) for x in db.roles.find().sort("name",1)]
+
+
+def create_role(db,model,actor):
+    permissions=sorted(set(model.permissions))
+    if "*" in permissions:raise ApiError("El permiso total está reservado para el rol administrador",422,"reserved_permission")
+    doc={"code":model.code,"name":model.name.strip(),"permissions":permissions,"system":False,"created_at":datetime.now(UTC),"updated_at":datetime.now(UTC)}
+    try:identifier=db.roles.insert_one(doc).inserted_id
+    except DuplicateKeyError as error:raise ApiError("El código del rol ya existe",409,"duplicate_role") from error
+    audit(db,actor,"role.create","role",identifier,metadata={"code":model.code,"permissions":permissions})
+    return to_json({**doc,"id":str(identifier)})
 
 
 def business_settings(db):

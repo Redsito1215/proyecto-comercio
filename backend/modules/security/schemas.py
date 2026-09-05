@@ -18,6 +18,13 @@ class UserCreate(BootstrapCreate):
     roles:list[str]=Field(default_factory=lambda:["cashier"],min_length=1,max_length=5)
 
 
+class RoleCreate(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    code:str=Field(pattern=r"^[a-z][a-z0-9_-]{2,39}$")
+    name:str=Field(min_length=3,max_length=80)
+    permissions:list[str]=Field(min_length=1,max_length=60)
+
+
 class BusinessSettingsUpdate(BaseModel):
     model_config=ConfigDict(extra="forbid")
     business_name:str=Field(min_length=2,max_length=160)

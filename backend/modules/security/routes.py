@@ -1,10 +1,12 @@
-from flask import Blueprint,g,jsonify,request
+from datetime import UTC,datetime,time
+from flask import Blueprint,g,jsonify,request,send_file
 from backend.auth.decorators import require_permission
 from backend.common.errors import ApiError
 from backend.db import get_db
 from backend.modules.core.routes import validate
-from backend.modules.security.schemas import BootstrapCreate,BusinessSettingsUpdate,LoginCreate,UserCreate
-from backend.modules.security.services import audit_log,bootstrap,bootstrap_available,business_settings,create_user,list_roles,list_users,login,logout,update_business_settings
+from backend.modules.security.pdf import create_audit_pdf
+from backend.modules.security.schemas import BootstrapCreate,BusinessSettingsUpdate,LoginCreate,RoleCreate,UserCreate
+from backend.modules.security.services import audit_log,bootstrap,bootstrap_available,business_settings,create_role,create_user,list_roles,list_users,login,logout,update_business_settings
 
 security_bp=Blueprint("security",__name__,url_prefix="/api/v1/security")
 
@@ -36,6 +38,10 @@ def users_list():return jsonify({"data":list_users(get_db())})
 @require_permission("security.users.read")
 def roles_list():return jsonify({"data":list_roles(get_db())})
 
+@security_bp.post("/roles")
+@require_permission("security.users.write")
+def roles_create():return jsonify({"data":create_role(get_db(),validate(RoleCreate,request.get_json(silent=True)),g.actor_id)}),201
+
 @security_bp.get("/settings")
 @require_permission("settings.read")
 def settings_get():return jsonify({"data":business_settings(get_db())})
@@ -46,4 +52,14 @@ def settings_put():return jsonify({"data":update_business_settings(get_db(),vali
 
 @security_bp.get("/audit")
 @require_permission("security.audit.read")
-def audit_list():return jsonify({"data":audit_log(get_db())})
+def audit_list():return jsonify({"data":audit_log(get_db(),**_audit_filters())})
+
+def _audit_filters():
+    start=request.args.get("date_from");end=request.args.get("date_to")
+    return {"action":request.args.get("action","").strip(),"outcome":request.args.get("outcome","").strip(),"actor":request.args.get("actor","").strip(),"date_from":datetime.combine(datetime.fromisoformat(start).date(),time.min,UTC) if start else None,"date_to":datetime.combine(datetime.fromisoformat(end).date(),time.max,UTC) if end else None}
+
+@security_bp.get("/audit/pdf")
+@require_permission("security.audit.read")
+def audit_pdf():
+    rows=audit_log(get_db(),**_audit_filters())
+    return send_file(create_audit_pdf(rows),mimetype="application/pdf",as_attachment=True,download_name="auditoria-seguridad.pdf")
