@@ -38,16 +38,21 @@ usuarios, roles, configuración y auditoría de `007`.
 
 ## Perfil analítico
 
-Inicie ClickHouse y Airflow:
+Inicie la plataforma completa y espere sus comprobaciones de salud:
 
-`docker compose --profile analytics up -d --build`
+`docker compose --profile analytics up -d --build --wait`
 
 - Airflow: `http://127.0.0.1:8088`
 - DAG: `comercio_inteligente_etl`, programado cada hora.
 - Las credenciales iniciales de Airflow aparecen una vez en `docker compose logs airflow`.
 
 El perfil `analytics` es opcional para la operación diaria y obligatorio para la analítica histórica. Los informes operativos siguen disponibles si ClickHouse está temporalmente fuera de línea.
-MongoDB y ClickHouse permanecen dentro de la red Docker y no publican sus puertos de datos en el host.
+
+MongoDB publica `127.0.0.1:27017` únicamente para administración local con Compass. ClickHouse permanece dentro de la red Docker. El servicio `mongo-init` es una tarea idempotente: es correcto que Docker Desktop lo muestre como **Exited (0)** después de inicializar o comprobar el replica set. Los servicios permanentes (`mongo`, `backend`, `clickhouse` y `airflow`) deben aparecer como **healthy**.
+
+Para revisar el estado use:
+
+`docker compose --profile analytics ps -a`
 
 ## Informes
 

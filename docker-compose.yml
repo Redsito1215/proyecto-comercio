@@ -1,5 +1,16 @@
+name: proyecto-comercio-inteligente
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   mongo:
+    <<: *service-defaults
     image: mongo:8.0
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
@@ -8,6 +19,8 @@ services:
       - "27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - data
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 5s
@@ -21,14 +34,22 @@ services:
         condition: service_healthy
     restart: "no"
     entrypoint:
-      - bash
-      - -c
+      - /bin/bash
+      - -ec
       - >-
         mongosh --host mongo:27017 --eval
-        'try { rs.status() } catch (e) { rs.initiate({_id:"rs0",members:[{_id:0,host:"mongo:27017"}]}) }'
+        'try { if (!rs.status().ok) { quit(1) } }
+        catch (e) { rs.initiate({_id:"rs0",members:[{_id:0,host:"mongo:27017"}]}) }';
+        until mongosh --host mongo:27017 --quiet --eval
+        'quit(db.hello().isWritablePrimary ? 0 : 1)'; do sleep 1; done
+    networks:
+      - data
 
   backend:
+    <<: *service-defaults
     build: .
+    image: proyecto-comercio/backend:local
+    init: true
     env_file:
       - .env
     environment:
@@ -45,8 +66,13 @@ services:
       retries: 10
     volumes:
       - ./output/pdf:/app/output/pdf
+    networks:
+      - app
+      - data
+      - analytics
 
   clickhouse:
+    <<: *service-defaults
     image: clickhouse/clickhouse-server:24.12
     profiles: ["analytics"]
     expose:
@@ -58,6 +84,8 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./analytics/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - analytics
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
       interval: 10s
@@ -65,9 +93,15 @@ services:
       retries: 20
 
   airflow:
+    <<: *service-defaults
     build: ./analytics/airflow
+    image: proyecto-comercio/airflow:local
+    init: true
     profiles: ["analytics"]
-    command: standalone
+    command:
+      - bash
+      - -c
+      - rm -f /opt/airflow/airflow-webserver.pid && exec airflow standalone
     ports:
       - "127.0.0.1:8088:8080"
     environment:
@@ -80,11 +114,20 @@ services:
     volumes:
       - airflow_data:/opt/airflow
       - ./analytics/airflow/dags:/opt/airflow/dags:ro
+    networks:
+      - data
+      - analytics
     depends_on:
       mongo-init:
         condition: service_completed_successfully
       clickhouse:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   seed:
     build: .
@@ -94,8 +137,21 @@ services:
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+    networks:
+      - data
+
+networks:
+  app:
+    name: proyecto-comercio-app
+  data:
+    name: proyecto-comercio-data
+  analytics:
+    name: proyecto-comercio-analytics
 
 volumes:
   mongo_data:
+    name: proyecto-comercio-inteligente_mongo_data
   clickhouse_data:
+    name: proyecto-comercio-inteligente_clickhouse_data
   airflow_data:
+    name: proyecto-comercio-inteligente_airflow_data
