@@ -112,7 +112,14 @@
           <div class="sale-layout">
             <section class="panel">
               <div class="panel-head"><div><span class="eyebrow">Catálogo</span><h2>Seleccionar productos</h2></div><span class="source-chip"><span></span> Inventario en vivo</span></div>
-              <label class="sale-search"><span>Buscar producto</span><input id="sale-search" type="search" placeholder="Nombre, SKU o código de barras" autocomplete="off"></label>
+              <div class="sale-filters">
+                <label class="sale-search"><span>Producto, SKU o código</span><input id="sale-search" type="search" placeholder="Escribe para buscar" autocomplete="off"></label>
+                <label><span>Categoría</span><select id="sale-category"><option value="">Todas</option></select></label>
+                <label><span>Bodega</span><select id="sale-location"><option value="main">Principal</option></select></label>
+                <label><span>Disponibilidad</span><select id="sale-stock"><option value="available">Con stock</option><option value="all">Todos</option><option value="low">Stock bajo</option></select></label>
+                <button class="btn sale-clear" id="sale-clear-filters" type="button">Limpiar</button>
+              </div>
+              <div class="catalog-summary"><span id="sale-result-count">Cargando catálogo…</span><small>Selecciona un producto para añadirlo a la venta.</small></div>
               <div class="product-results" id="product-results" aria-live="polite"><div class="empty-state"><span class="empty-mark">CI</span><h3>Escribe para buscar</h3><p>Los productos disponibles aparecerán aquí.</p></div></div>
             </section>
             <aside class="panel sale-cart">

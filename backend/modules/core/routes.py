@@ -22,7 +22,10 @@ def validate(model, payload):
 @core_bp.get("/products")
 @require_permission("products.read")
 def products_list():
-    products = [serialize_product(item) for item in search_products(get_db(), request.args.get("q", ""))]
+    products = [serialize_product(item) for item in search_products(
+        get_db(), request.args.get("q", ""), category_id=request.args.get("category_id", ""),
+        location_id=request.args.get("location_id", ""),
+    )]
     return jsonify({"data": products})
 
 

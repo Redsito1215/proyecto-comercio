@@ -19,8 +19,10 @@ def next_number(db, key: str, prefix: str, session=None) -> str:
     return f"{prefix}-{counter['value']:06d}"
 
 
-def search_products(db, query: str = "", limit: int = 30):
+def search_products(db, query: str = "", limit: int = 30, category_id: str = "", location_id: str = ""):
     criteria = {"active": True}
+    if category_id and ObjectId.is_valid(category_id):
+        criteria["category_id"] = ObjectId(category_id)
     if query:
         normalized = normalize(query)
         criteria["$or"] = [
@@ -31,7 +33,10 @@ def search_products(db, query: str = "", limit: int = 30):
     pipeline = [
         {"$match": criteria}, {"$sort": {"name_normalized": 1}}, {"$limit": min(limit, 100)},
         {"$lookup": {"from": "inventory", "let": {"pid": "$_id"}, "pipeline": [
-            {"$match": {"$expr": {"$eq": ["$product_id", "$$pid"]}}},
+            {"$match": {"$expr": {"$and": [
+                {"$eq": ["$product_id", "$$pid"]},
+                *([{"$eq": ["$location_id", location_id]}] if location_id else []),
+            ]}}},
             {"$group": {"_id": None, "available": {"$sum": "$available"}}},
         ], "as": "stock"}},
         {"$set": {"available": {"$ifNull": [{"$first": "$stock.available"}, 0]}}},

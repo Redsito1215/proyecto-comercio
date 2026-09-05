@@ -7,17 +7,26 @@
   const confirmButton = document.getElementById('confirm-sale');
   const message = document.getElementById('sale-message');
   const nextStep = document.getElementById('sale-next-step');
+  const categoryFilter = document.getElementById('sale-category');
+  const locationFilter = document.getElementById('sale-location');
+  const stockFilter = document.getElementById('sale-stock');
+  const resultCount = document.getElementById('sale-result-count');
   const cart = new Map();
   let timer;
+  let productsCache = [];
 
   const money = value => new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(Number(value));
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 
   async function loadProducts() {
     const query = search.value.trim();
-    const response = await fetch(`/api/v1/products?q=${encodeURIComponent(query)}`);
+    const params = new URLSearchParams({q:query, location_id:locationFilter.value});
+    if(categoryFilter.value) params.set('category_id',categoryFilter.value);
+    const response = await fetch(`/api/v1/products?${params}`);
     const payload = await response.json();
-    const products = payload.data || [];
+    productsCache = payload.data || [];
+    const products = productsCache.filter(product=>stockFilter.value==='all'||(stockFilter.value==='low'?product.available>0&&product.available<=5:product.available>0));
+    resultCount.textContent = `${products.length} producto${products.length===1?'':'s'} encontrado${products.length===1?'':'s'} · ${locationFilter.options[locationFilter.selectedIndex]?.text||'Bodega'}`;
     results.innerHTML = products.length ? products.map(product => `
       <div class="product-row">
         <div><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.sku)} · ${money(product.current_price)}</small></div>
@@ -29,6 +38,13 @@
       if (!current || current.quantity < product.available) cart.set(product.id, { ...product, quantity: (current?.quantity || 0) + 1 });
       renderCart();
     }));
+  }
+
+  async function loadFilters(){
+    const [categoriesResponse,locationsResponse]=await Promise.all([fetch('/api/v1/categories'),fetch('/api/v1/locations')]);
+    const categories=(await categoriesResponse.json()).data||[],locations=(await locationsResponse.json()).data||[];
+    categoryFilter.innerHTML='<option value="">Todas</option>'+categories.map(item=>`<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('');
+    locationFilter.innerHTML=locations.length?locations.map(item=>`<option value="${escapeHtml(String(item.code||item.id).toLowerCase())}">${escapeHtml(item.name)}</option>`).join(''):'<option value="main">Principal</option>';
   }
 
   function renderCart() {
@@ -53,7 +69,7 @@
   confirmButton.addEventListener('click', async () => {
     confirmButton.disabled = true; message.className = 'form-message'; message.textContent = 'Confirmando venta…';
     try {
-      const draft = await fetch('/api/v1/sales', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({location_id:'main',items:[...cart.values()].map(item=>({product_id:item.id,quantity:item.quantity}))}) });
+      const draft = await fetch('/api/v1/sales', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({location_id:locationFilter.value||'main',items:[...cart.values()].map(item=>({product_id:item.id,quantity:item.quantity}))}) });
       const draftPayload = await draft.json(); if (!draft.ok) throw new Error(draftPayload.error?.message || 'No se pudo crear la venta');
       const confirmed = await fetch(`/api/v1/sales/${draftPayload.data.id}/confirm`, { method:'POST', headers:{'Idempotency-Key':crypto.randomUUID()} });
       const payload = await confirmed.json(); if (!confirmed.ok) throw new Error(payload.error?.message || 'No se pudo confirmar');
@@ -65,6 +81,8 @@
   });
 
   search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(loadProducts, 250); });
+  [categoryFilter,locationFilter,stockFilter].forEach(filter=>filter.addEventListener('change',()=>{if(filter===locationFilter)cart.clear();renderCart();loadProducts()}));
+  document.getElementById('sale-clear-filters').addEventListener('click',()=>{search.value='';categoryFilter.value='';stockFilter.value='available';loadProducts();search.focus()});
   document.getElementById('continue-payment').addEventListener('click',()=>{window.dispatchEvent(new Event('ci:pending-sale'));const target=document.querySelector('.nav-item[data-page="caja"]');window.ciShowPage('caja',target.querySelector('.nav-label').textContent);document.getElementById('payment-form')?.scrollIntoView({behavior:'smooth',block:'center'});});
-  loadProducts(); renderCart();
+  loadFilters().finally(loadProducts); renderCart();
 })();
