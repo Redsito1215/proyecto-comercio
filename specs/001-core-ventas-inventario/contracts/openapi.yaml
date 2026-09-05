@@ -5,6 +5,15 @@ info:
 servers:
   - url: /api/v1
 paths:
+  /categories:
+    get: {summary: Listar categorías, responses: {'200': {description: Lista}}}
+    post: {summary: Crear categoría, responses: {'201': {description: Creada}, '409': {description: Código duplicado}}}
+  /suppliers:
+    get: {summary: Listar proveedores, responses: {'200': {description: Lista}}}
+    post: {summary: Crear proveedor, responses: {'201': {description: Creado}, '409': {description: Código duplicado}}}
+  /locations:
+    get: {summary: Listar sucursales y almacenes, responses: {'200': {description: Lista}}}
+    post: {summary: Crear ubicación, responses: {'201': {description: Creada}, '409': {description: Código duplicado}}}
   /products:
     get:
       summary: Buscar productos vigentes
@@ -21,6 +30,12 @@ paths:
       summary: Consultar existencias, lotes y alertas
       responses:
         '200': { description: Inventario consultado }
+  /inventory/receipts:
+    post:
+      summary: Registrar entrada directa de inventario
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
+      responses: {'201': {description: Entrada registrada}}
   /sales:
     post:
       summary: Crear borrador de venta
@@ -36,6 +51,9 @@ paths:
         '200': { description: Venta confirmada }
         '409': { description: Stock o versión en conflicto }
   /purchase-orders:
+    get:
+      summary: Listar órdenes de compra
+      responses: {'200': {description: Lista}}
     post:
       summary: Crear orden de compra
       responses:

@@ -1,13 +1,30 @@
 openapi: 3.1.0
 info: {title: Comercio Inteligente - Pagos y seguridad, version: 1.0.0}
 paths:
+  /api/v1/security/bootstrap:
+    post: {summary: Crea el administrador inicial una sola vez, responses: {'201': {description: Creado}, '409': {description: Inicialización cerrada}}}
   /api/v1/security/login:
     post: {summary: Inicia sesión, responses: {'200': {description: Token opaco}, '401': {description: Credenciales inválidas}}}
   /api/v1/security/users:
+    get: {summary: Lista usuarios sin exponer credenciales, responses: {'200': {description: Lista}}}
     post: {summary: Crea usuario, responses: {'201': {description: Creado}, '403': {description: Sin permiso}}}
+  /api/v1/security/logout:
+    post: {summary: Revoca la sesión actual, responses: {'200': {description: Revocada}}}
+  /api/v1/security/roles:
+    get: {summary: Lista roles y permisos, responses: {'200': {description: Lista}}}
+  /api/v1/security/settings:
+    get: {summary: Consulta parámetros del negocio, responses: {'200': {description: Configuración}}}
+    put: {summary: Actualiza parámetros con auditoría, responses: {'200': {description: Actualizada}}}
   /api/v1/payments:
+    get: {summary: Lista pagos sanitizados, responses: {'200': {description: Lista}}}
     post: {summary: Crea y procesa pago sandbox idempotente, responses: {'201': {description: Procesado}, '409': {description: Excede saldo}}}
   /api/v1/payments/{id}/refunds:
     post: {summary: Reembolsa importe aprobado, responses: {'201': {description: Procesado}}}
   /api/v1/security/audit:
     get: {summary: Consulta auditoría sanitizada, responses: {'200': {description: OK}}}
+  /api/v1/reports/analytics/status:
+    get: {summary: Comprueba disponibilidad de ClickHouse, responses: {'200': {description: Estado}}}
+  /api/v1/reports/preview:
+    post: {summary: Previsualiza un informe simple o compuesto, responses: {'200': {description: Instantánea}}}
+  /api/v1/reports/pdf:
+    post: {summary: Genera un PDF auditable desde la instantánea, responses: {'200': {description: Documento PDF}}}

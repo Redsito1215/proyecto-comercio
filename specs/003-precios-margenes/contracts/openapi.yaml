@@ -12,3 +12,5 @@ paths:
       responses: {'200': {description: Precio aplicado}, '409': {description: Margen bajo el mínimo}}
   /api/v1/pricing/competitor-prices:
     post: {summary: Registra precio competitivo, responses: {'201': {description: Creado}}}
+  /api/v1/pricing/products/{productId}/market-comparison:
+    get: {summary: Compara el precio vigente con referencias competitivas, responses: {'200': {description: Comparación}}}

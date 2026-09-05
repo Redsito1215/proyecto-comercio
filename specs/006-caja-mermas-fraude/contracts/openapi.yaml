@@ -1,14 +1,19 @@
 openapi: 3.1.0
 info: {title: Comercio Inteligente - Controles, version: 1.0.0}
 paths:
+  /api/v1/controls/dashboard:
+    get: {summary: Consulta estado de caja, mermas y alertas, responses: {'200': {description: OK}}}
   /api/v1/controls/cash-sessions:
     post: {summary: Abre sesión, responses: {'201': {description: Abierta}, '409': {description: Ya existe sesión}}}
-    get: {summary: Lista sesiones, responses: {'200': {description: OK}}}
   /api/v1/controls/cash-sessions/{id}/movements:
     post: {summary: Registra movimiento, responses: {'201': {description: Registrado}}}
   /api/v1/controls/cash-sessions/{id}/counts:
     post: {summary: Realiza arqueo, responses: {'201': {description: Registrado}}}
+  /api/v1/controls/cash-sessions/{id}/close:
+    post: {summary: Cierra la sesión mediante arqueo final, responses: {'200': {description: Cerrada}}}
   /api/v1/controls/losses:
     post: {summary: Registra merma, responses: {'201': {description: Registrada}}}
   /api/v1/controls/alerts:
     get: {summary: Lista señales de revisión, responses: {'200': {description: OK}}}
+  /api/v1/controls/alerts/{id}/resolve:
+    post: {summary: Resuelve una señal preservando la auditoría, responses: {'200': {description: Resuelta}}}

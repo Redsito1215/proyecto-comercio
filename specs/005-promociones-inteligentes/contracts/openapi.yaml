@@ -10,3 +10,5 @@ paths:
     post: {summary: Activa y crea outbox para tratamiento, responses: {'200': {description: Activa}}}
   /api/v1/promotions/{id}/metrics:
     get: {summary: Mide resultado incremental, responses: {'200': {description: OK}}}
+  /api/v1/promotions/redemptions:
+    post: {summary: Canjea una promoción elegible sobre una venta, responses: {'201': {description: Canje aplicado}, '409': {description: No elegible}}}

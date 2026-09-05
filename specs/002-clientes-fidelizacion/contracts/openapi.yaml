@@ -8,7 +8,7 @@ paths:
     get: {summary: Consultar perfil consolidado, responses: {'200': {description: Perfil}}}
   /api/v1/customers/{id}/consents:
     post: {summary: Registrar o revocar consentimiento, responses: {'201': {description: Registrado}}}
-  /api/v1/customers/recalculate:
+  /api/v1/customers/{id}/recalculate:
     post: {summary: Recalcular métricas y señales explicables, responses: {'200': {description: Calculado}}}
   /api/v1/customers/{id}/birthday-coupon:
     post: {summary: Emitir cupón elegible, responses: {'201': {description: Emitido}}}
