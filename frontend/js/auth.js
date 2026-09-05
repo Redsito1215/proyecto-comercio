@@ -21,11 +21,12 @@
     return body.data;
   }
   document.addEventListener('DOMContentLoaded',()=>{
-    const gate=document.getElementById('auth-gate'),message=document.getElementById('auth-message'),stored=sessionStorage.getItem(userKey),user=stored?JSON.parse(stored):null;
+    const gate=document.getElementById('auth-gate'),message=document.getElementById('auth-message'),bootstrapDetails=document.getElementById('bootstrap-details'),stored=sessionStorage.getItem(userKey),user=stored?JSON.parse(stored):null;
     gate.hidden=Boolean(token());
+    nativeFetch('/api/v1/security/bootstrap/status').then(response=>response.json()).then(body=>{bootstrapDetails.hidden=!body.data?.available}).catch(()=>{bootstrapDetails.hidden=true});
     if(user){document.getElementById('user-name').textContent=user.name;document.getElementById('user-role').textContent=(user.roles||[]).join(', ');document.getElementById('user-avatar').textContent=user.name.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()}
     document.getElementById('login-form').onsubmit=async event=>{event.preventDefault();const data=await submit(event.currentTarget,'/api/v1/security/login',message);if(data)saveSession(data)};
-    document.getElementById('bootstrap-form').onsubmit=async event=>{event.preventDefault();const form=event.currentTarget,data=await submit(form,'/api/v1/security/bootstrap',message);if(!data)return;const login=await nativeFetch('/api/v1/security/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.email.value,password:form.password.value})}),body=await login.json();if(login.ok)saveSession(body.data)};
+    document.getElementById('bootstrap-form').onsubmit=async event=>{event.preventDefault();const form=event.currentTarget,data=await submit(form,'/api/v1/security/bootstrap',message);if(!data){const status=await nativeFetch('/api/v1/security/bootstrap/status').then(response=>response.json());bootstrapDetails.hidden=!status.data?.available;return}bootstrapDetails.hidden=true;const login=await nativeFetch('/api/v1/security/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.email.value,password:form.password.value})}),body=await login.json();if(login.ok)saveSession(body.data)};
     document.getElementById('logout-button').onclick=async()=>{await window.fetch('/api/v1/security/logout',{method:'POST'});sessionStorage.removeItem(tokenKey);sessionStorage.removeItem(userKey);location.reload()};
   });
 })();

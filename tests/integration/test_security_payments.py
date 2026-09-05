@@ -6,7 +6,7 @@ from backend.db import get_db
 
 def clear(db):
     assert db.name.endswith('_test')
-    for name in ('users','auth_sessions','audit_events','payments','refunds','sales'):db[name].delete_many({})
+    for name in ('users','auth_sessions','audit_events','payments','refunds','sales','bootstrap_state'):db[name].delete_many({})
 
 
 def test_bootstrap_login_hashes_password_and_session_token():
@@ -16,6 +16,15 @@ def test_bootstrap_login_hashes_password_and_session_token():
     logged=client.post('/api/v1/security/login',json={'email':'admin@example.com','password':password});assert logged.status_code==200;raw=logged.json['data']['access_token']
     session=db.auth_sessions.find_one();assert session['token_hash']!=raw and raw not in str(session)
     assert db.audit_events.count_documents({'action':'auth.login'})==1
+
+
+def test_bootstrap_is_visible_once_and_then_closes():
+    db=get_db();clear(db);client=create_app(testing=True).test_client();payload={'name':'Administradora','email':'owner@example.com','password':'Clave-Inicial-Segura-2026'}
+    assert client.get('/api/v1/security/bootstrap/status').json['data']['available'] is True
+    assert client.post('/api/v1/security/bootstrap',json=payload).status_code==201
+    assert client.get('/api/v1/security/bootstrap/status').json['data']['available'] is False
+    duplicate=client.post('/api/v1/security/bootstrap',json={**payload,'email':'other@example.com'})
+    assert duplicate.status_code==409 and duplicate.json['error']['code']=='bootstrap_closed'
 
 
 def test_payment_is_idempotent_and_stores_no_pan_or_cvv():

@@ -23,9 +23,18 @@ def _create_user(db,model,roles):
 
 
 def bootstrap(db,model):
-    if db.users.count_documents({})>0:raise ApiError("La inicialización ya fue realizada",409,"bootstrap_closed")
-    uid=_create_user(db,model,["admin"]);audit(db,uid,"security.bootstrap","user",uid)
+    if db.users.count_documents({"roles":"admin"})>0:raise ApiError("La inicialización ya fue realizada",409,"bootstrap_closed")
+    try:db.bootstrap_state.insert_one({"_id":"admin-bootstrap","claimed_at":datetime.now(UTC)})
+    except DuplicateKeyError as error:raise ApiError("La inicialización ya fue realizada",409,"bootstrap_closed") from error
+    try:uid=_create_user(db,model,["admin"])
+    except Exception:
+        db.bootstrap_state.delete_one({"_id":"admin-bootstrap"});raise
+    audit(db,uid,"security.bootstrap","user",uid)
     return {"id":str(uid),"name":model.name,"email":str(model.email),"roles":["admin"]}
+
+
+def bootstrap_available(db):
+    return db.users.count_documents({"roles":"admin"})==0 and db.bootstrap_state.count_documents({"_id":"admin-bootstrap"})==0
 
 
 def create_user(db,model,actor):

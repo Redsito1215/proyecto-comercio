@@ -4,12 +4,15 @@ from backend.common.errors import ApiError
 from backend.db import get_db
 from backend.modules.core.routes import validate
 from backend.modules.security.schemas import BootstrapCreate,BusinessSettingsUpdate,LoginCreate,UserCreate
-from backend.modules.security.services import audit_log,bootstrap,business_settings,create_user,list_roles,list_users,login,logout,update_business_settings
+from backend.modules.security.services import audit_log,bootstrap,bootstrap_available,business_settings,create_user,list_roles,list_users,login,logout,update_business_settings
 
 security_bp=Blueprint("security",__name__,url_prefix="/api/v1/security")
 
 @security_bp.post("/bootstrap")
 def bootstrap_create():return jsonify({"data":bootstrap(get_db(),validate(BootstrapCreate,request.get_json(silent=True)))}),201
+
+@security_bp.get("/bootstrap/status")
+def bootstrap_status():return jsonify({"data":{"available":bootstrap_available(get_db())}})
 
 @security_bp.post("/login")
 def login_create():return jsonify({"data":login(get_db(),validate(LoginCreate,request.get_json(silent=True)))})
