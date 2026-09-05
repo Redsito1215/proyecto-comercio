@@ -27,6 +27,15 @@ La documentación funcional sigue GitHub Spec Kit en `.specify/` y `specs/001` a
 4. Abra `http://127.0.0.1:5001`.
 5. En **Primera instalación**, cree el administrador inicial. Después, todo acceso a la API requiere una sesión y permisos RBAC.
 
+El sembrado es idempotente y prepara productos, inventario, lotes, categorías, proveedores,
+sucursales, clientes con consentimiento, referencias competitivas y configuración empresarial.
+
+## Gestión administrativa
+
+La agrupación **Gestión** conserva la estructura obligatoria de siete Specs. Administración
+centraliza categorías, proveedores y ubicaciones de `001`, la relación operativa con `006`, y
+usuarios, roles, configuración y auditoría de `007`.
+
 ## Perfil analítico
 
 Inicie ClickHouse y Airflow:
