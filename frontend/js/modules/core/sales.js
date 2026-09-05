@@ -6,6 +6,7 @@
   const countRoot = document.getElementById('cart-count');
   const confirmButton = document.getElementById('confirm-sale');
   const message = document.getElementById('sale-message');
+  const nextStep = document.getElementById('sale-next-step');
   const cart = new Map();
   let timer;
 
@@ -32,7 +33,7 @@
 
   function renderCart() {
     const lines = [...cart.values()];
-    cartRoot.innerHTML = lines.length ? lines.map(item => `<div class="cart-line"><div><strong>${escapeHtml(item.name)}</strong><small>${money(item.current_price)} c/u</small></div><div class="cart-quantity"><button data-action="minus" data-id="${item.id}">−</button><b>${item.quantity}</b><button data-action="plus" data-id="${item.id}">+</button></div></div>`).join('') : '<div class="empty-state compact"><p>Agrega productos para comenzar.</p></div>';
+    cartRoot.innerHTML = lines.length ? lines.map(item => `<div class="cart-line"><div><strong>${escapeHtml(item.name)}</strong><small>${money(item.current_price)} c/u · ${item.available} disponibles</small></div><div class="cart-quantity"><button data-action="minus" data-id="${item.id}" aria-label="Restar ${escapeHtml(item.name)}">−</button><input type="number" inputmode="numeric" min="1" max="${item.available}" value="${item.quantity}" data-quantity="${item.id}" aria-label="Cantidad de ${escapeHtml(item.name)}"><button data-action="plus" data-id="${item.id}" aria-label="Sumar ${escapeHtml(item.name)}">+</button></div></div>`).join('') : '<div class="empty-state compact"><p>Agrega productos para comenzar.</p></div>';
     const units = lines.reduce((sum, item) => sum + item.quantity, 0);
     const total = lines.reduce((sum, item) => sum + Number(item.current_price) * item.quantity, 0);
     countRoot.textContent = units; totalRoot.textContent = money(total); confirmButton.disabled = !lines.length;
@@ -43,6 +44,10 @@
       if (item.quantity < 1) cart.delete(item.id); else cart.set(item.id, item);
       renderCart();
     }));
+    cartRoot.querySelectorAll('[data-quantity]').forEach(input=>input.addEventListener('change',()=>{
+      const item=cart.get(input.dataset.quantity);if(!item)return;
+      const quantity=Math.max(1,Math.min(item.available,Number.parseInt(input.value,10)||1));item.quantity=quantity;cart.set(item.id,item);renderCart();
+    }));
   }
 
   confirmButton.addEventListener('click', async () => {
@@ -52,10 +57,14 @@
       const draftPayload = await draft.json(); if (!draft.ok) throw new Error(draftPayload.error?.message || 'No se pudo crear la venta');
       const confirmed = await fetch(`/api/v1/sales/${draftPayload.data.id}/confirm`, { method:'POST', headers:{'Idempotency-Key':crypto.randomUUID()} });
       const payload = await confirmed.json(); if (!confirmed.ok) throw new Error(payload.error?.message || 'No se pudo confirmar');
-      message.className = 'form-message success'; message.textContent = `Venta ${payload.data.number} confirmada correctamente.`; cart.clear(); renderCart(); loadProducts();
+      message.className = 'form-message success'; message.textContent = `Venta ${payload.data.number} confirmada.`;
+      sessionStorage.setItem('ci-pending-sale',JSON.stringify({id:draftPayload.data.id,number:payload.data.number,total:payload.data.total}));
+      window.dispatchEvent(new Event('ci:pending-sale'));
+      nextStep.hidden=false;cart.clear();renderCart();loadProducts();
     } catch (error) { message.className = 'form-message error'; message.textContent = error.message; confirmButton.disabled = false; }
   });
 
   search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(loadProducts, 250); });
+  document.getElementById('continue-payment').addEventListener('click',()=>{window.dispatchEvent(new Event('ci:pending-sale'));const target=document.querySelector('.nav-item[data-page="caja"]');window.ciShowPage('caja',target.querySelector('.nav-label').textContent);document.getElementById('payment-form')?.scrollIntoView({behavior:'smooth',block:'center'});});
   loadProducts(); renderCart();
 })();

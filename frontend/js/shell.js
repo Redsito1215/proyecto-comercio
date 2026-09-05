@@ -23,6 +23,7 @@ function showPage(name, label) {
   document.getElementById('topbar-title').textContent = label;
   closeMobileMenu();
 }
+window.ciShowPage=showPage;
 
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => showPage(item.dataset.page, item.querySelector('.nav-label').textContent)));
 document.querySelectorAll('[data-go]').forEach(item => item.addEventListener('click', () => {
