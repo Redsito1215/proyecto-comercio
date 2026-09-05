@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask import Blueprint, g, jsonify, request
 from pydantic import ValidationError
 
@@ -34,8 +35,14 @@ def products_list():
 def products_create():
     model = validate(ProductCreate, request.get_json(silent=True))
     db = get_db()
+    payload=to_mongo(model.model_dump())
+    for field,collection in (("category_id",db.categories),("supplier_id",db.suppliers)):
+        value=payload.get(field)
+        if value and (not ObjectId.is_valid(value) or not collection.find_one({"_id":ObjectId(value),"active":{"$ne":False}})):
+            raise ApiError("Categoría o proveedor inválido",422,"invalid_product_catalog")
+        payload[field]=ObjectId(value) if value else None
     try:
-        product_id = insert_product(db, to_mongo(model.model_dump()))
+        product_id = insert_product(db, payload)
     except Exception as error:
         if error.__class__.__name__ == "DuplicateKeyError":
             raise ApiError("El SKU o código de barras ya existe", 409, "duplicate_product") from error

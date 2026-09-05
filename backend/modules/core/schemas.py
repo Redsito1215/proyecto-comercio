@@ -20,6 +20,9 @@ class ProductCreate(BaseModel):
     barcode: str | None = Field(default=None, max_length=60)
     current_price: Decimal = Field(gt=0, decimal_places=2)
     average_cost: Decimal = Field(ge=0, decimal_places=2)
+    minimum_margin_percent: Decimal = Field(default=20, ge=0, le=100, decimal_places=2)
+    category_id: str | None = Field(default=None, min_length=24, max_length=24)
+    supplier_id: str | None = Field(default=None, min_length=24, max_length=24)
     perishable: bool = False
 
     @field_validator("sku", "name", "unit")
