@@ -140,3 +140,61 @@ html{scroll-padding-top:70px}.topbar{min-height:64px;gap:.5rem;padding:.55rem .7
 .product-management{grid-column:1/-1}.product-management-form{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:.7rem;align-items:end}.product-management-form label{display:grid;gap:.3rem;color:var(--muted);font-size:.72rem}.product-management-form input,.product-management-form select{width:100%;min-height:40px;box-sizing:border-box;padding:.55rem .65rem;border:1px solid var(--border);border-radius:7px;background:var(--input-bg);color:var(--text)}.product-management-form .check-field{display:flex;align-items:center;min-height:40px;gap:.45rem}.product-management-form .check-field input{width:auto;min-height:auto}.product-management-form>.btn{min-height:40px}.product-management-list{display:grid;margin-top:1rem}.product-management-row{display:grid;grid-template-columns:minmax(220px,1fr) 90px 90px auto;align-items:center;gap:.8rem;padding:.7rem 0;border-bottom:1px solid var(--border)}.product-management-row div>strong,.product-management-row div>small,.product-management-row span>small,.product-management-row span>strong{display:block}.product-management-row small{color:var(--muted)}
 @media(max-width:1100px){.product-management-form{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.product-management-form{grid-template-columns:1fr 1fr}.product-management-row{grid-template-columns:1fr auto}.product-management-row>span:not(.status-pill){display:none}}
+
+/* Revisión UX integral: escala legible, densidad equilibrada y navegación táctil. */
+:root{--content-readable:1320px}
+.page-shell{width:min(100%,var(--content-readable));padding:clamp(1.25rem,2.4vw,2.25rem)}
+.page-hero{max-width:72ch;margin-bottom:1.35rem}
+.page-title{font-size:clamp(2rem,3vw,2.8rem);letter-spacing:-.025em}
+.page-lead{font-size:1rem;line-height:1.65}
+.page-badge,.eyebrow{font-size:.75rem;line-height:1.35}
+.panel{padding:clamp(1rem,1.8vw,1.4rem)}
+.panel h2{font-size:clamp(1.2rem,1.5vw,1.45rem)}
+.panel-head{gap:.8rem}
+.metric-grid{gap:1rem}
+.metric-card{min-height:104px;padding:1.05rem 1.15rem}
+.metric-card span,.metric-card small,.product-row small,.cart-line small,.customer-row small,.management-row small,.product-management-row small,.campaign-row small,.signal-list small,.role-card small,.role-card>span,.role-card details,.analytics-source small,.analytics-source strong{font-size:.8125rem;line-height:1.45}
+.metric-card strong{font-size:clamp(1.45rem,2.2vw,1.9rem)}
+.btn{min-height:44px;padding:.65rem .95rem;font-size:.875rem}
+.icon-btn{width:44px;height:44px}
+.topbar-kicker,.user-chip small,.source-chip{font-size:.75rem}
+.sale-search,.inline-form label,.return-form label,.forecast-form label,.promotion-form label,.loss-form label,.payment-form label,.inventory-filters label,.sale-filters label,.audit-filters label,.product-management-form label,.report-form>label,.report-dates label,.report-presets>span,.report-selection-tools label,.filter-summary,.catalog-summary,.form-message{font-size:.8125rem;line-height:1.45}
+.inline-form input,.inline-form select,.return-form input,.customer-form input,.forecast-form select,.promotion-form input,.promotion-form select,.control-form input,.control-form select,.loss-form input,.loss-form select,.payment-form input,.payment-form select,.inventory-filters input,.inventory-filters select,.sale-filters input,.sale-filters select,.audit-filters input,.audit-filters select,.product-management-form input,.product-management-form select,.report-form input,.report-selection-tools select{min-height:44px}
+.data-table td{font-size:.875rem;line-height:1.45}
+.data-table th{font-size:.75rem;line-height:1.35}
+.status-pill,.stock-pill,.cart-count,.margin-pill,.confidence-pill{font-size:.75rem;line-height:1.3}
+.report-checks label,.permission-grid label{min-height:44px;box-sizing:border-box;font-size:.8125rem;line-height:1.35}
+.report-presets .btn,.report-selection-tools>button{min-height:40px;font-size:.8125rem}
+.campaign-actions .btn,.price-form .btn,.cart-quantity button{min-height:40px}
+.cart-quantity button{width:40px;height:40px}
+.cart-quantity input{width:64px;height:40px}
+.report-preview{min-height:360px}
+#page-inventario .table-wrap,#page-caja .table-wrap,#page-seguridad .table-wrap,#page-precios .table-wrap,#page-pronostico .table-wrap{max-height:430px}
+.product-management-list{max-height:430px;overflow:auto;scrollbar-gutter:stable}
+.management-list{max-height:300px;overflow:auto;scrollbar-gutter:stable}
+.bottom-dock.sidebar{height:calc(88px + env(safe-area-inset-bottom))}
+.bottom-dock .nav-item{height:87px;flex-basis:104px;width:104px!important;padding:.65rem .35rem .45rem!important}
+.bottom-dock .nav-item.active{height:98px;margin-top:-11px!important}
+.bottom-dock .nav-item .nav-icon{width:32px;height:32px}
+.bottom-dock .nav-item .nav-icon svg{width:29px;height:29px}
+.bottom-dock .nav-item .nav-label,.bottom-dock .nav-item.active .nav-label{font-size:.75rem;line-height:1.2}
+.app-main{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+
+@media(max-width:900px){
+.page-shell{padding:1.15rem 1rem 1.5rem}
+.page-title{font-size:clamp(1.85rem,5vw,2.35rem)}
+.report-preview{min-height:280px}
+.bottom-dock .nav-item{flex-basis:96px;width:96px!important}
+}
+@media(max-width:620px){
+.topbar{min-height:60px}.page-shell{padding:1rem .85rem 1.35rem}.page-hero{margin-bottom:1rem}.page-title{font-size:1.9rem}.page-lead{font-size:.9375rem;line-height:1.55}
+.metric-grid,#page-seguridad .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-card{min-height:96px;padding:.85rem}.metric-card strong{font-size:1.45rem}.metric-card span,.metric-card small{font-size:.75rem}
+.panel{padding:.9rem;border-radius:14px}.panel-head{min-height:0}.panel h2{font-size:1.2rem}
+.report-checks{grid-template-columns:1fr 1fr}.report-preview{min-height:220px}.empty-state{padding:1.5rem .75rem}
+.management-tabs{position:sticky;top:60px;z-index:8;margin-inline:-.85rem;padding:.55rem .85rem;background:var(--bg);border-bottom:1px solid var(--border)}
+.management-tabs .btn{min-width:max-content}
+.product-management-form{grid-template-columns:1fr}.product-management-row{grid-template-columns:minmax(0,1fr) auto}.product-management-row>span:not(.status-pill){display:grid}
+.audit-filters{grid-template-columns:1fr}.audit-filters .btn{width:100%}
+.bottom-dock.sidebar{height:calc(84px + env(safe-area-inset-bottom))}.bottom-dock .nav-item{height:83px;flex-basis:92px;width:92px!important;padding:.5rem .3rem .35rem!important}.bottom-dock .nav-item.active{height:93px}.bottom-dock .nav-item .nav-icon{width:30px;height:30px}.bottom-dock .nav-item .nav-icon svg{width:27px;height:27px}.bottom-dock .nav-item .nav-label,.bottom-dock .nav-item.active .nav-label{font-size:.7rem}.app-main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){.metric-grid,#page-seguridad .metric-grid,.report-checks{grid-template-columns:1fr}.page-title{font-size:1.7rem}}
