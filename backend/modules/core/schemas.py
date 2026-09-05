@@ -28,6 +28,26 @@ class ProductCreate(BaseModel):
         return value.strip()
 
 
+class CatalogCreate(BaseModel):
+    code: str = Field(min_length=1, max_length=40)
+    name: str = Field(min_length=2, max_length=160)
+    active: bool = True
+
+    @field_validator("code", "name")
+    @classmethod
+    def normalize_catalog(cls, value: str) -> str:
+        return value.strip()
+
+
+class SupplierCreate(CatalogCreate):
+    email: str | None = Field(default=None, max_length=160)
+    phone: str | None = Field(default=None, max_length=40)
+
+
+class LocationCreate(CatalogCreate):
+    address: str | None = Field(default=None, max_length=240)
+
+
 class SaleLineCreate(BaseModel):
     product_id: str = Field(min_length=24, max_length=24)
     quantity: int = Field(gt=0, le=10000)

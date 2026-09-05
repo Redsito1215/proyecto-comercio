@@ -74,3 +74,24 @@ def logout(db,raw_token,actor):
 
 def audit_log(db):
     return [to_json({**x,"id":str(x["_id"])}) for x in db.audit_events.find().sort("occurred_at",-1).limit(200)]
+
+
+def list_users(db):
+    return [to_json({"id":str(x["_id"]),"name":x["name"],"email":x["email"],"roles":x.get("roles",[]),"status":x.get("status","active"),"last_login_at":x.get("last_login_at")}) for x in db.users.find({}, {"password_hash":0}).sort("name",1)]
+
+
+def list_roles(db):
+    return [to_json({**x,"id":str(x["_id"])}) for x in db.roles.find().sort("name",1)]
+
+
+def business_settings(db):
+    defaults={"business_name":"Comercio Inteligente","tax_id":"","currency":"USD","timezone":"America/Guayaquil","low_stock_threshold":5,"expiry_warning_days":30}
+    stored=db.settings.find_one({"key":"business"},{"_id":0,"key":0}) or {}
+    return {**defaults,**stored}
+
+
+def update_business_settings(db,model,actor):
+    values=model.model_dump();values["updated_at"]=datetime.now(UTC);values["updated_by"]=str(actor)
+    db.settings.update_one({"key":"business"},{"$set":values,"$setOnInsert":{"created_at":datetime.now(UTC)}},upsert=True)
+    audit(db,actor,"settings.update","business",metadata={"fields":list(type(model).model_fields)})
+    return to_json(values)

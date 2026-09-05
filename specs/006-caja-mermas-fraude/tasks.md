@@ -13,3 +13,5 @@
 - [X] T011 Crear pruebas unitarias, contrato e integración
 - [X] T012 Implementar interfaz Altavia
 - [X] T013 Verificar Docker y regresión
+
+- [x] T-G03 Integrar sucursales y ubicaciones administrables con la operación de caja e inventario.

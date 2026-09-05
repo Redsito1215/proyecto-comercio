@@ -6,7 +6,7 @@ from backend.common.errors import ApiError
 from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
-from backend.modules.core.schemas import InventoryReceiptCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, ReturnCreate, SaleCreate, StockCountCreate
+from backend.modules.core.schemas import CatalogCreate, InventoryReceiptCreate, LocationCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, ReturnCreate, SaleCreate, StockCountCreate, SupplierCreate
 from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_return, create_sale_draft, create_stock_count, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
@@ -38,6 +38,44 @@ def products_create():
             raise ApiError("El SKU o código de barras ya existe", 409, "duplicate_product") from error
         raise
     return jsonify({"data": serialize_product(db.products.find_one({"_id": product_id}))}), 201
+
+
+def _catalog_list(collection):
+    return [to_json({**x,"id":str(x["_id"])}) for x in collection.find().sort("name",1)]
+
+
+def _catalog_create(collection, model):
+    doc=to_mongo(model.model_dump());doc["code"]=doc["code"].upper();doc["name_normalized"]=doc["name"].casefold()
+    try: identifier=collection.insert_one(doc).inserted_id
+    except Exception as error:
+        if error.__class__.__name__=="DuplicateKeyError":raise ApiError("El código ya existe",409,"duplicate_catalog") from error
+        raise
+    return to_json({**doc,"id":str(identifier)})
+
+
+@core_bp.get("/categories")
+@require_permission("catalogs.read")
+def categories_list():return jsonify({"data":_catalog_list(get_db().categories)})
+
+@core_bp.post("/categories")
+@require_permission("catalogs.write")
+def categories_create():return jsonify({"data":_catalog_create(get_db().categories,validate(CatalogCreate,request.get_json(silent=True)))}),201
+
+@core_bp.get("/suppliers")
+@require_permission("catalogs.read")
+def suppliers_list():return jsonify({"data":_catalog_list(get_db().suppliers)})
+
+@core_bp.post("/suppliers")
+@require_permission("catalogs.write")
+def suppliers_create():return jsonify({"data":_catalog_create(get_db().suppliers,validate(SupplierCreate,request.get_json(silent=True)))}),201
+
+@core_bp.get("/locations")
+@require_permission("catalogs.read")
+def locations_list():return jsonify({"data":_catalog_list(get_db().locations)})
+
+@core_bp.post("/locations")
+@require_permission("catalogs.write")
+def locations_create():return jsonify({"data":_catalog_create(get_db().locations,validate(LocationCreate,request.get_json(silent=True)))}),201
 
 
 @core_bp.post("/sales")

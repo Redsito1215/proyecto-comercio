@@ -91,3 +91,6 @@ historias elegidas para la entrega.
 
 El MVP comprende T001–T021. Cada historia se valida independientemente antes de continuar.
 Las tareas `[P]` modifican archivos distintos o son pruebas que pueden prepararse en paralelo.
+
+- [x] T-G01 Exponer la administración de categorías, proveedores y ubicaciones desde Gestión.
+- [x] T-G02 Añadir contratos y validaciones para catálogos operativos reutilizables.

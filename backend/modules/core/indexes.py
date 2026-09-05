@@ -6,6 +6,8 @@ def ensure_indexes(db):
     if barcode_index and "partialFilterExpression" not in barcode_index:
         db.products.drop_index("barcodes_1")
     db.categories.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
+    db.suppliers.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
+    db.locations.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
     db.products.create_indexes([
         IndexModel("sku", unique=True),
         IndexModel("barcodes", unique=True, partialFilterExpression={"barcodes.0":{"$exists":True}}),

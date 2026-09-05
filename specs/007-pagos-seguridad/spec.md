@@ -26,6 +26,8 @@ Como auditor quiero roles de mínimo privilegio y un registro inmutable de acces
 - **FR-008**: MUST bloquear temporalmente tras intentos fallidos repetidos.
 - **FR-009**: MUST emitir sesiones aleatorias, almacenar únicamente su hash y aplicar expiración/revocación.
 - **FR-010**: MUST autorizar mediante roles y permisos explícitos.
+- **FR-011**: El administrador MUST poder consultar usuarios y roles sin exponer credenciales.
+- **FR-012**: El administrador MUST poder mantener parámetros generales del negocio y auditar cada cambio.
 - **FR-011**: MUST auditar autenticación, usuarios, permisos, pagos y reembolsos.
 - **FR-012**: MUST ocultar secretos y datos personales en respuestas y logs.
 - **FR-013**: MUST distinguir claramente el adaptador sandbox de un proveedor real.

@@ -14,3 +14,7 @@
 - [X] T012 Crear pruebas unitarias, contrato e integración
 - [X] T013 Implementar interfaz Altavia
 - [X] T014 Verificar Docker, regresión y ausencia de PAN/CVV
+
+- [x] T-G04 Implementar gestión de usuarios y consulta de roles con RBAC.
+- [x] T-G05 Implementar parámetros generales del negocio con auditoría de cambios.
+- [x] T-G06 Añadir interfaz responsive de Administración dentro de la agrupación Gestión.
