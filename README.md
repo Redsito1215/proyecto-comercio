@@ -67,6 +67,10 @@ El adaptador incluido es `local-sandbox`. Acepta tokens de prueba `tok_approved_
 
   `docker compose exec -T -e MONGO_DB=comercio_inteligente_test backend pytest tests/integration -q`
 
+- Recorrido integral de demostración (venta, inventario, cliente, caja, pago y PDF):
+
+  `docker compose run --rm -e MONGO_DB=comercio_e2e_test backend pytest tests/integration/test_end_to_end_demo.py -q`
+
 Las pruebas destructivas verifican que la base termine en `_test` antes de limpiar colecciones.
 
 ## Preparación de producción
