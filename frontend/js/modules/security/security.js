@@ -14,5 +14,7 @@
   const params=()=>new URLSearchParams([...new FormData(filters)].filter(([,value])=>value));
   async function audit(){if(!body)return;body.innerHTML='<tr><td colspan="5">Consultando eventos…</td></tr>';const r=await fetch(`/api/v1/security/audit?${params()}`),o=await r.json(),rows=o.data||[];body.innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.occurred_at).toLocaleString('es-EC')}</td><td>${escape(x.action)}</td><td>${escape(x.entity_type)}</td><td>${escape(x.actor_id)}</td><td><span class="status-pill">${escape(x.outcome)}</span></td></tr>`).join(''):'<tr><td colspan="5">No existen eventos con estos filtros.</td></tr>'}
   filters.onsubmit=e=>{e.preventDefault();audit()};filters.querySelector('[data-clear-audit]').onclick=()=>{filters.reset();audit()};filters.querySelector('[data-audit-pdf]').onclick=async()=>{const r=await fetch(`/api/v1/security/audit/pdf?${params()}`),blob=await r.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='auditoria-seguridad.pdf';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-  document.getElementById('security-refresh')?.addEventListener('click',audit);audit();
+  document.getElementById('security-refresh')?.addEventListener('click',audit);
+  window.addEventListener('ci:pagechange',event=>{if(event.detail?.page==='seguridad')audit()});
+  audit();
 })();

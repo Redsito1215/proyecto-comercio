@@ -117,7 +117,11 @@ def receive_purchase_order(db, order_id: str, model, key: str, actor_id: str):
 
 
 def list_purchase_orders(db):
-    return [{**to_json(row),"id":str(row["_id"])} for row in db.purchase_orders.find().sort("created_at",-1).limit(100)]
+    orders = []
+    for row in db.purchase_orders.find().sort("created_at", -1).limit(100):
+        items = [to_json(item) for item in db.purchase_order_items.find({"purchase_order_id": row["_id"]})]
+        orders.append({**to_json(row), "id": str(row["_id"]), "items": items})
+    return orders
 
 
 def create_stock_count(db, model, actor_id):

@@ -16,5 +16,6 @@
   document.getElementById('inventory-refresh').addEventListener('click', loadInventory);
   [productFilter,locationFilter,statusFilter].forEach(control=>control.addEventListener('input',render));
   document.getElementById('inventory-clear-filters').addEventListener('click',()=>{productFilter.value='';locationFilter.value='';statusFilter.value='';render()});
+  window.addEventListener('ci:pagechange', event => { if (event.detail?.page === 'inventario') loadInventory(); });
   loadInventory();
 })();

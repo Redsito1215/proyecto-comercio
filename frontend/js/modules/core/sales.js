@@ -52,7 +52,7 @@
     const [categoriesResponse,locationsResponse,customersResponse]=await Promise.all([fetch('/api/v1/categories'),fetch('/api/v1/locations'),fetch('/api/v1/customers')]);
     const categories=(await categoriesResponse.json()).data||[],locations=(await locationsResponse.json()).data||[],customers=(await customersResponse.json()).data||[];
     categoryFilter.innerHTML='<option value="">Todas</option>'+categories.map(item=>`<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('');
-    locationFilter.innerHTML=locations.length?locations.map(item=>`<option value="${escapeHtml(String(item.code||item.id).toLowerCase())}">${escapeHtml(item.name)}</option>`).join(''):'<option value="main">Principal</option>';
+    locationFilter.innerHTML='<option value="main">Principal</option>'+locations.filter(item=>String(item.code||item.id).toLowerCase()!=='main').map(item=>`<option value="${escapeHtml(String(item.code||item.id).toLowerCase())}">${escapeHtml(item.name)}</option>`).join('');
     customerFilter.innerHTML='<option value="">Consumidor final</option>'+customers.map(item=>`<option value="${item.id}">${escapeHtml(item.name)}${item.email?' · '+escapeHtml(item.email):''}</option>`).join('');
     updateFlow(2);
   }
@@ -96,5 +96,6 @@
   [categoryFilter,locationFilter,stockFilter].forEach(filter=>filter.addEventListener('change',()=>{if(filter===locationFilter)cart.clear();renderCart();loadProducts()}));
   document.getElementById('sale-clear-filters').addEventListener('click',()=>{search.value='';categoryFilter.value='';stockFilter.value='available';loadProducts();search.focus()});
   document.getElementById('continue-payment').addEventListener('click',()=>{window.dispatchEvent(new Event('ci:pending-sale'));const target=document.querySelector('.nav-item[data-page="caja"]');window.ciShowPage('caja',target.querySelector('.nav-label').textContent);document.getElementById('payment-form')?.scrollIntoView({behavior:'smooth',block:'center'});});
+  window.addEventListener('ci:pagechange',event=>{if(event.detail?.page==='ventas')loadFilters().finally(loadProducts)});
   loadFilters().finally(loadProducts); renderCart();
 })();

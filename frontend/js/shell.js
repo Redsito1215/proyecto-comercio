@@ -22,6 +22,7 @@ function showPage(name, label) {
   document.getElementById('placeholder-title').textContent = label;
   document.getElementById('topbar-title').textContent = label;
   closeMobileMenu();
+  window.dispatchEvent(new CustomEvent('ci:pagechange', { detail: { page: name } }));
 }
 window.ciShowPage=showPage;
 
