@@ -5,6 +5,9 @@ def ensure_indexes(db):
     barcode_index=db.products.index_information().get("barcodes_1")
     if barcode_index and "partialFilterExpression" not in barcode_index:
         db.products.drop_index("barcodes_1")
+    sales_number_index=db.sales.index_information().get("number_1")
+    if sales_number_index and not sales_number_index.get("sparse"):
+        db.sales.drop_index("number_1")
     db.categories.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
     db.suppliers.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
     db.locations.create_indexes([IndexModel("code", unique=True), IndexModel("name_normalized")])
@@ -18,7 +21,7 @@ def ensure_indexes(db):
         IndexModel([("product_id", ASCENDING), ("location_id", ASCENDING), ("lot_number", ASCENDING)], unique=True),
         IndexModel([("status", ASCENDING), ("expires_at", ASCENDING)]),
     ])
-    db.sales.create_indexes([IndexModel("number", unique=True), IndexModel("idempotency_key", unique=True, sparse=True)])
+    db.sales.create_indexes([IndexModel("number", unique=True, sparse=True), IndexModel("idempotency_key", unique=True, sparse=True)])
     db.inventory_movements.create_indexes([
         IndexModel([("product_id", ASCENDING), ("occurred_at", DESCENDING)]),
         IndexModel([("source_type", ASCENDING), ("source_id", ASCENDING)]),

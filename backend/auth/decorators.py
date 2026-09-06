@@ -13,13 +13,14 @@ def require_permission(permission: str):
                 g.actor_id = request.headers.get("X-Actor-Id", "development-user")
                 return function(*args, **kwargs)
             from backend.db import get_db
-            from backend.modules.security.services import authenticate, permissions_for
+            from backend.modules.security.services import audit, authenticate, permissions_for
             raw=request.headers.get("Authorization","").removeprefix("Bearer ").strip();db=get_db();user=authenticate(db,raw)
             if not user:raise ApiError("Autenticación requerida",401,"authentication_required")
             permissions=permissions_for(db,user)
             if permission=="authenticated" or "*" in permissions or permission in permissions:
                 g.actor_id=str(user["_id"]);g.user=user
                 return function(*args,**kwargs)
+            audit(db,user["_id"],"security.permission_denied","endpoint",request.endpoint,outcome="blocked",metadata={"permission":permission,"method":request.method})
             raise ApiError("No tiene permiso para esta operación", 403, "forbidden")
         return wrapped
     return decorator
