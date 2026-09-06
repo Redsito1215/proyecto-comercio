@@ -14,6 +14,7 @@ def test_bootstrap_login_hashes_password_and_session_token():
     created=client.post('/api/v1/security/bootstrap',json={'name':'Administrador','email':'admin@example.com','password':password});assert created.status_code==201
     user=db.users.find_one();assert user['password_hash']!=password and 'scrypt' in user['password_hash']
     logged=client.post('/api/v1/security/login',json={'email':'admin@example.com','password':password});assert logged.status_code==200;raw=logged.json['data']['access_token']
+    assert logged.json['data']['user']['permissions']==['*']
     session=db.auth_sessions.find_one();assert session['token_hash']!=raw and raw not in str(session)
     assert db.audit_events.count_documents({'action':'auth.login'})==1
 
@@ -25,6 +26,18 @@ def test_bootstrap_is_visible_once_and_then_closes():
     assert client.get('/api/v1/security/bootstrap/status').json['data']['available'] is False
     duplicate=client.post('/api/v1/security/bootstrap',json={**payload,'email':'other@example.com'})
     assert duplicate.status_code==409 and duplicate.json['error']['code']=='bootstrap_closed'
+
+
+def test_login_returns_effective_permissions_for_cashier():
+    db=get_db();clear(db);client=create_app(testing=True).test_client();password='Clave-Cajero-Segura-2026'
+    db.roles.update_one({'code':'cashier'},{'$set':{'name':'Cajero','permissions':['products.read','sales.read','sales.write','sales.confirm','payments.write','returns.write'],'system':True}},upsert=True)
+    created=client.post('/api/v1/security/users',json={'name':'Cajero de prueba','email':'cashier@example.com','password':password,'roles':['cashier']})
+    assert created.status_code==201
+    logged=client.post('/api/v1/security/login',json={'email':'cashier@example.com','password':password})
+    assert logged.status_code==200
+    user=logged.json['data']['user']
+    assert user['roles']==['cashier']
+    assert user['permissions']==['payments.write','products.read','returns.write','sales.confirm','sales.read','sales.write']
 
 
 def test_payment_is_idempotent_and_stores_no_pan_or_cvv():

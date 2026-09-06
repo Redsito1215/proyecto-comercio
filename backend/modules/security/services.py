@@ -58,7 +58,7 @@ def login(db,model):
     raw=secrets.token_urlsafe(48);token_hash=hashlib.sha256(raw.encode()).hexdigest();expires=now+timedelta(hours=8)
     db.auth_sessions.insert_one({"user_id":user["_id"],"token_hash":token_hash,"expires_at":expires,"created_at":now,"revoked_at":None})
     db.users.update_one({"_id":user["_id"]},{"$set":{"failed_attempts":0,"locked_until":None,"last_login_at":now}});audit(db,user["_id"],"auth.login","user",user["_id"])
-    return {"access_token":raw,"token_type":"Bearer","expires_at":expires.isoformat(),"user":{"id":str(user["_id"]),"name":user["name"],"roles":user["roles"]}}
+    return {"access_token":raw,"token_type":"Bearer","expires_at":expires.isoformat(),"user":{"id":str(user["_id"]),"name":user["name"],"roles":user["roles"],"permissions":sorted(permissions_for(db,user))}}
 
 
 def authenticate(db,raw_token):
@@ -71,6 +71,7 @@ def authenticate(db,raw_token):
 
 
 def permissions_for(db,user):
+    if "admin" in user.get("roles",[]):return {"*"}
     permissions=set()
     for role in db.roles.find({"code":{"$in":user.get("roles",[])}}):permissions.update(role["permissions"])
     return permissions

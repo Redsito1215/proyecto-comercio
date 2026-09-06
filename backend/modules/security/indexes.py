@@ -8,6 +8,8 @@ ROLE_DEFINITIONS={
     "auditor":["products.read","sales.read","inventory.read","security.audit.read","payments.read","customers.read","reports.read"],
 }
 
+ROLE_NAMES={"admin":"Administrador","cashier":"Cajero","supervisor":"Supervisor","auditor":"Auditor"}
+
 
 def ensure_security_indexes(db):
     db.users.create_index("email_normalized",unique=True)
@@ -16,4 +18,4 @@ def ensure_security_indexes(db):
     db.audit_events.create_index([("occurred_at",DESCENDING),("action",ASCENDING)])
     db.settings.create_index("key",unique=True)
     now=datetime.now(UTC)
-    for code,permissions in ROLE_DEFINITIONS.items():db.roles.update_one({"code":code},{"$set":{"name":code.title(),"permissions":permissions,"system":True,"updated_at":now}},upsert=True)
+    for code,permissions in ROLE_DEFINITIONS.items():db.roles.update_one({"code":code},{"$set":{"name":ROLE_NAMES[code],"permissions":permissions,"system":True,"updated_at":now}},upsert=True)

@@ -5,7 +5,7 @@
   form.querySelector('.report-checks').before(presets);
   const tools=document.createElement('div');tools.className='report-selection-tools';tools.innerHTML='<button type="button" data-report-all>Seleccionar todo</button><button type="button" data-report-none>Limpiar selección</button><label>Periodo rápido<select data-report-period><option value="">Personalizado</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="month">Este mes</option></select></label>';
   form.querySelector('.report-checks').after(tools);
-  const sections=()=>[...form.querySelectorAll('[name="sections"]')];
+  const sections=()=>[...form.querySelectorAll('[name="sections"]')].filter(input=>(window.ciAllowedReportSections?.()||[]).includes(input.value));
   const presetMap={general:['sales','inventory','margins','customers','losses','payments','forecasts'],cash:['sales','payments','losses'],stock:['inventory','margins','forecasts'],customers:['customers','sales']};
   function selectSections(values){sections().forEach(input=>input.checked=values.includes(input.value))}
   presets.querySelectorAll('[data-report-preset]').forEach(button=>button.onclick=()=>{presets.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===button));selectSections(presetMap[button.dataset.reportPreset])});
