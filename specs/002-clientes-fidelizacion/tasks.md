@@ -13,3 +13,4 @@
 - [X] T011 Crear interfaz de clientes en `frontend/js/modules/customers/customers.js`
 - [X] T012 Crear perfil y señales en `frontend/index.html`
 - [X] T013 Ejecutar pruebas e integración Docker en `tests/integration/test_customers.py`
+- [X] T014 Migrar email y documento a índices únicos parciales que admiten clientes sin esos datos.

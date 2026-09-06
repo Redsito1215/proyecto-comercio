@@ -18,3 +18,8 @@
 - [x] T-G04 Implementar gestión de usuarios y consulta de roles con RBAC.
 - [x] T-G05 Implementar parámetros generales del negocio con auditoría de cambios.
 - [x] T-G06 Añadir interfaz responsive de Administración dentro de la agrupación Gestión.
+- [X] T015 Devolver permisos efectivos y ocultar módulos y acciones no autorizados en la interfaz.
+- [X] T016 Auditar intentos bloqueados por permisos con actor, método y permiso requerido.
+- [X] T017 Conciliar pagos en efectivo con una sesión de caja abierta sin duplicar movimientos.
+- [X] T018 Añadir filtros, previsualización y PDF para auditoría e informes compuestos.
+- [X] T019 Verificar el flujo completo y escenarios negativos en contenedores saludables.

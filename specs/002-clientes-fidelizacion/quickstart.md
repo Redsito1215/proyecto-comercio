@@ -6,4 +6,5 @@
 4. Recalcular métricas y comprobar explicación de segmentos.
 5. Simular retraso respecto del intervalo habitual.
 6. Generar cupón de cumpleaños; verificar que el cliente sin consentimiento no recibe notificación.
-7. Ejecutar `docker compose exec backend pytest -q tests/unit tests/contract` y las integraciones contra `comercio_inteligente_test`.
+7. Ejecutar las unitarias sin modificar `MONGO_DB`; limpiar exclusivamente
+   `comercio_inteligente_test` y ejecutar allí contratos e integraciones.

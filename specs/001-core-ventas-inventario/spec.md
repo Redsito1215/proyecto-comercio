@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-core-ventas-inventario`
 **Created**: 2026-09-03
-**Status**: Ready for planning
+**Status**: Completed and verified
 **Input**: Venta rápida, inventario digital, compras, lotes, caducidad, agotados y ventas perdidas.
 
 ## User Scenarios & Testing *(mandatory)*

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-caja-mermas-fraude`  
 **Created**: 2026-09-03  
-**Status**: Ready for implementation
+**Status**: Completed and verified
 
 ## User Stories
 
@@ -28,12 +28,15 @@ Como auditor quiero recibir señales por diferencias repetidas, anulaciones o aj
 - **FR-010**: MUST mostrar impacto de mermas sobre el margen.
 - **FR-011**: MUST conservar auditoría y permitir resolver señales con comentario.
 - **FR-012**: MUST separar permisos de cajero, supervisor y auditor.
+- **FR-013**: MUST exigir una sesión de caja abierta para aprobar un pago en efectivo.
+- **FR-014**: MUST registrar automáticamente y una sola vez el movimiento de caja de cada pago en efectivo aprobado.
 
 ## Success Criteria
 - El saldo esperado coincide exactamente con los movimientos auditados.
 - Todo cierre conserva conteo, diferencia y responsable.
 - El 100 % de alertas contiene evidencia y puede resolverse sin borrar historial.
 - Las mermas muestran unidades y costo económico por causa.
+- Un reintento del mismo pago en efectivo no duplica ni el pago ni su movimiento de caja.
 
 ## Assumptions
 - En 007 se conectarán medios de pago y seguridad reforzada.

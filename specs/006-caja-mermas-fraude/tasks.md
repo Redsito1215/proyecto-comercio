@@ -15,3 +15,5 @@
 - [X] T013 Verificar Docker y regresión
 
 - [x] T-G03 Integrar sucursales y ubicaciones administrables con la operación de caja e inventario.
+- [X] T014 Integrar pagos en efectivo con la caja abierta mediante un movimiento idempotente.
+- [X] T015 Probar rechazo sin caja, reintentos y conciliación exacta al cierre.

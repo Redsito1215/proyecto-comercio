@@ -17,7 +17,9 @@ docker compose ps
 ## Pruebas
 
 ```powershell
-docker compose exec backend pytest -q tests/unit tests/contract tests/integration
+docker compose exec -T backend pytest -q tests/unit
+docker compose exec -T mongo mongosh --quiet --eval "db.getSiblingDB('comercio_inteligente_test').dropDatabase()"
+docker compose exec -T -e MONGO_DB=comercio_inteligente_test backend pytest -q tests/contract tests/integration
 ```
 
 ## Escenarios de aceptación

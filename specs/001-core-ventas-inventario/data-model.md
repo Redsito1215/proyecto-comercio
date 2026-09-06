@@ -11,12 +11,12 @@ Todos los documentos incluyen `_id`, `created_at`, `updated_at` y `version` cuan
 
 ### products
 
-`sku` único, `name`, `category_id`, `unit`, `barcodes[]` únicos, `perishable`,
-`reorder_point`, `expiry_alert_days`, `active`.
+`sku` único, `name`, `category_id`, `unit`, `barcodes[]`, `perishable`, `active`,
+`name_normalized` y metadatos de versión.
 
 ### locations
 
-`code` único, `name`, `type`, `active`.
+`code` único, `name`, `address`, `active`.
 
 ### inventory
 
@@ -35,31 +35,22 @@ Regla: cantidades no negativas y `available = on_hand - reserved`.
 
 ### suppliers
 
-`tax_id` único, `name`, `contacts`, `lead_time_days`, `active`.
-
-### product_suppliers
-
-Clave única (`product_id`, `supplier_id`), `supplier_sku`, `last_cost`, `minimum_order`,
-`pack_size`, `preferred`, `active`.
+`code` único, `name`, `email`, `phone`, `active`.
 
 ### purchase_orders / purchase_order_items
 
-Cabecera: `number`, `supplier_id`, `status`, fechas, moneda, totales, `idempotency_key`.
-Detalle: producto, cantidad pedida/recibida, costo y descuentos congelados.
-Estados: `draft → sent → partially_received → received`; `draft|sent → cancelled`.
-
-### purchase_receipts
-
-`number`, `purchase_order_id`, `items[]` con producto, lote, caducidad, cantidad y costo,
-`received_by`, `received_at`, `idempotency_key`.
+Cabecera: `number`, `supplier_name`, `location_id`, `status`, fechas e `idempotency_key`.
+Detalle: producto, cantidad pedida/recibida y costo unitario congelado.
+Estados: `draft → sent → partially_received → received`. Cada recepción se materializa de
+forma transaccional en lotes, inventario, movimientos y cantidades recibidas de la orden.
 
 ### sales / sale_items
 
 Cabecera: `number`, `customer_id?`, `location_id`, `status`, importes, `actor_id`,
 `idempotency_key`, fechas. Detalle: producto, cantidad, precio, descuentos, impuestos, costo
 congelado y asignaciones de lote.
-Estados: `draft → confirmed → partially_returned → returned`; `draft|confirmed → cancelled`
-según autorización y efectos compensatorios.
+Estados implementados: `draft → confirmed → partially_returned`. Las devoluciones generan
+documentos y movimientos compensatorios sin reescribir la venta original.
 
 ### stock_counts / stock_count_items
 

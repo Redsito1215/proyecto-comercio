@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-pagos-seguridad`  
 **Created**: 2026-09-04  
-**Status**: Ready for implementation
+**Status**: Completed and verified
 
 ## User Stories
 
@@ -28,10 +28,11 @@ Como auditor quiero roles de mínimo privilegio y un registro inmutable de acces
 - **FR-010**: MUST autorizar mediante roles y permisos explícitos.
 - **FR-011**: El administrador MUST poder consultar usuarios y roles sin exponer credenciales.
 - **FR-012**: El administrador MUST poder mantener parámetros generales del negocio y auditar cada cambio.
-- **FR-011**: MUST auditar autenticación, usuarios, permisos, pagos y reembolsos.
-- **FR-012**: MUST ocultar secretos y datos personales en respuestas y logs.
-- **FR-013**: MUST distinguir claramente el adaptador sandbox de un proveedor real.
-- **FR-014**: MUST incluir cabeceras HTTP defensivas.
+- **FR-013**: MUST auditar autenticación, usuarios, permisos denegados, pagos y reembolsos.
+- **FR-014**: MUST ocultar secretos y datos personales en respuestas y logs.
+- **FR-015**: MUST distinguir claramente el adaptador sandbox de un proveedor real.
+- **FR-016**: MUST incluir cabeceras HTTP defensivas.
+- **FR-017**: MUST exigir una caja abierta y crear exactamente un movimiento de caja por cada pago en efectivo aprobado.
 
 ## Success Criteria
 - Ninguna colección contiene PAN o CVV.
@@ -39,6 +40,8 @@ Como auditor quiero roles de mínimo privilegio y un registro inmutable de acces
 - Un usuario sin permiso recibe 403 fuera del entorno de desarrollo.
 - Cinco intentos fallidos bloquean temporalmente la cuenta.
 - Toda operación sensible produce un evento de auditoría.
+- La interfaz oculta módulos y acciones no permitidos y el backend conserva la decisión definitiva de autorización.
+- Un pago en efectivo aprobado queda conciliado con su sesión de caja sin duplicarse al reintentar.
 
 ## Assumptions
 - El adaptador incluido es sandbox local; producción requiere credenciales de un adquirente certificado.

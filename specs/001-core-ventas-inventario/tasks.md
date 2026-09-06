@@ -94,3 +94,6 @@ Las tareas `[P]` modifican archivos distintos o son pruebas que pueden preparars
 
 - [x] T-G01 Exponer la administración de categorías, proveedores y ubicaciones desde Gestión.
 - [x] T-G02 Añadir contratos y validaciones para catálogos operativos reutilizables.
+- [X] T046 Validar el flujo comercial completo desde una base vacía.
+- [X] T047 Cubrir atomicidad, idempotencia y reglas negativas de stock, caja, devolución y merma.
+- [X] T048 Migrar índices únicos opcionales y números de venta sin bloquear documentos históricos.
