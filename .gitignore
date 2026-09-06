@@ -23,6 +23,7 @@ build/
 .mongo-data/
 airflow/logs/
 output/
+backups/*.archive
 tmp/
 *.log
 

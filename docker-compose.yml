@@ -22,10 +22,11 @@ services:
     networks:
       - data
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"quit(db.hello().isWritablePrimary ? 0 : 1)\""]
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 5s
 
   mongo-init:
     image: mongo:8.0
@@ -64,6 +65,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 10s
     volumes:
       - ./output/pdf:/app/output/pdf
     networks:
@@ -123,7 +125,7 @@ services:
       clickhouse:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null && airflow jobs check --job-type SchedulerJob --local"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -137,6 +139,23 @@ services:
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+    networks:
+      - data
+
+  mongo-backup:
+    image: mongo:8.0
+    profiles: ["tools"]
+    restart: "no"
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    entrypoint: ["/bin/bash", "-ec"]
+    command:
+      - >-
+        mongodump --uri='mongodb://mongo:27017/comercio_inteligente?replicaSet=rs0&directConnection=true'
+        --archive=/backup/comercio-inteligente-$$(date -u +%Y%m%dT%H%M%SZ).archive --gzip
+    volumes:
+      - ./backups:/backup
     networks:
       - data
 

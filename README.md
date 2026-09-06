@@ -54,6 +54,17 @@ Para revisar el estado use:
 
 `docker compose --profile analytics ps -a`
 
+## Persistencia y respaldo
+
+MongoDB, ClickHouse y Airflow conservan sus datos en volúmenes con nombre, incluso después de
+reiniciar o recrear los contenedores. Para generar un respaldo comprimido de la base operativa:
+
+`docker compose --profile tools run --rm mongo-backup`
+
+El archivo se guarda en `backups/` con fecha UTC y no se incluye en Git. Conserve una copia fuera
+del equipo antes de actualizaciones importantes. La restauración no se automatiza porque reemplaza
+datos: debe realizarse de forma deliberada con `mongorestore` sobre un respaldo seleccionado.
+
 ## Informes
 
 La pantalla **Informes** permite combinar ventas, inventario, márgenes, clientes, mermas, pagos y pronósticos. Primero presenta una vista previa y después genera el PDF desde una instantánea almacenada en `report_runs` y registrada en auditoría.
