@@ -13,7 +13,7 @@
     const denied=[];
     if(!can('sales.confirm'))denied.push('#confirm-sale');
     if(!can('purchases.write'))denied.push('#purchase-form');
-    if(!can('purchases.receive'))denied.push('[data-receive]');
+    if(!can('purchases.receive'))denied.push('[data-receive-order]');
     if(!can('inventory.count'))denied.push('#count-form');
     if(!can('payments.write'))denied.push('#payment-form');
     if(!can('sales.write'))denied.push('#cash-open-form','#cash-movement-form');

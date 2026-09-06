@@ -30,6 +30,10 @@ def create_payment(db,model,key,actor):
         if prior:return serialize(prior)
         sale=db.sales.find_one({"_id":ObjectId(model.sale_id),"status":{"$in":["confirmed","partially_returned"]}},session=session)
         if not sale:raise ApiError("Venta no disponible para pago",409,"sale_state_conflict")
+        cash_session=None
+        if model.method=="cash":
+            cash_session=db.cash_sessions.find_one({"status":"open","location_id":sale.get("location_id","main")},session=session)
+            if not cash_session:raise ApiError("Abra una caja antes de registrar un pago en efectivo",409,"cash_session_required")
         approved=dec(sale.get("paid_amount",0));due=dec(sale["total"])-approved
         if model.amount>due:raise ApiError("El importe supera el saldo pendiente",409,"payment_exceeds_due")
         doc={"sale_id":sale["_id"],"method":model.method,"amount":Decimal128(model.amount),"status":result["status"],"provider":gateway.name if model.method!="cash" else "internal-cash","provider_production_ready":False if model.method!="cash" else None,"provider_reference":result["reference"],"method_ref":token_ref,"brand":model.brand,"last4":model.last4,"idempotency_key":key,"actor_id":actor,"created_at":now,"processed_at":now}
@@ -39,6 +43,8 @@ def create_payment(db,model,key,actor):
             update={"$set":{"paid_amount":Decimal128(paid)}}
             if paid==dec(sale["total"]):update["$set"].update({"payment_status":"paid","paid_at":now})
             db.sales.update_one({"_id":sale["_id"]}, {**update,"$inc":{"version":1}},session=session)
+            if model.method=="cash":
+                db.cash_movements.insert_one({"session_id":cash_session["_id"],"type":"sale","direction":"in","amount":Decimal128(model.amount),"source_type":"sale","source_id":model.sale_id,"reason":"Pago en efectivo registrado automáticamente","idempotency_key":f"cash-payment-{key}","actor_id":actor,"occurred_at":now},session=session)
     audit(db,actor,"payment.process","payment",pid,result["status"],{"method":model.method,"amount":str(model.amount),"provider":doc["provider"]})
     return serialize({"_id":pid,**doc})
 
