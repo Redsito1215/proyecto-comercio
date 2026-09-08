@@ -1,22 +1,51 @@
-# Feature Specification: Promociones inteligentes
+# Especificación funcional: Promociones inteligentes
 
-**Feature Branch**: `005-promociones-inteligentes`  
-**Created**: 2026-09-03  
-**Status**: Completed and verified
+**Rama funcional**: `005-promociones-inteligentes`
+**Creada**: 2026-09-03
+**Estado**: Completada y verificada
 
-## User Stories
+## Historias de usuario
 
 ### US1 - Crear promoción rentable (P1)
 Como gerente quiero definir audiencia, productos, vigencia y descuento validando el margen mínimo antes de activarla.
 
+**Prueba independiente**: crear una promoción válida y otra que reduzca un producto por debajo de su margen mínimo.
+
+**Escenarios de aceptación**:
+
+1. **Dado** un descuento rentable, **cuando** se crea la promoción, **entonces** queda en borrador con productos y vigencia registrados.
+2. **Dado** un descuento no rentable, **cuando** se intenta crear, **entonces** se rechaza antes de preparar la audiencia.
+
 ### US2 - Elegir clientes con explicación (P1)
 Como responsable comercial quiero seleccionar clientes por afinidad, recurrencia y riesgo, respetando consentimiento y mostrando la razón.
+
+**Prueba independiente**: preparar una audiencia con clientes elegibles, sin consentimiento y pertenecientes al grupo control.
+
+**Escenarios de aceptación**:
+
+1. **Dado** un cliente elegible con consentimiento, **cuando** se prepara la audiencia, **entonces** recibe grupo y explicación.
+2. **Dado** un cliente sin consentimiento, **entonces** queda excluido y no recibe cupón ni notificación.
 
 ### US3 - Medir efecto incremental (P2)
 Como analista quiero separar tratamiento y control de forma estable para saber si la promoción causó compras adicionales.
 
-## Functional Requirements
-- **FR-001**: MUST administrar borrador, aprobación, activación, pausa y cierre.
+**Prueba independiente**: activar una campaña, registrar compras de ambos grupos y consultar conversión e ingreso comparables.
+
+**Escenarios de aceptación**:
+
+1. **Cuando** se repite la preparación, **entonces** un mismo cliente conserva su grupo experimental.
+2. **Cuando** se consultan métricas, **entonces** tratamiento y control aparecen separados y se calcula la diferencia de conversión.
+
+### Casos límite
+
+- Promoción fuera de vigencia al activarse.
+- Cliente que revoca consentimiento antes de preparar la audiencia.
+- Cupón vencido, agotado o aplicado a una venta de otro cliente.
+- Venta sin productos pertenecientes a la promoción.
+- Reintento de una redención ya registrada.
+
+## Requisitos funcionales
+- **FR-001**: MUST administrar los estados borrador, audiencia preparada y promoción activa.
 - **FR-002**: MUST definir descuento, productos, audiencia, vigencia y límite de usos.
 - **FR-003**: MUST simular margen posterior y rechazar campañas que crucen el piso.
 - **FR-004**: MUST exigir consentimiento vigente para comunicaciones.
@@ -28,12 +57,18 @@ Como analista quiero separar tratamiento y control de forma estable para saber s
 - **FR-010**: MUST medir conversión, ingresos, margen e incremento frente al control.
 - **FR-011**: MUST evitar ofrecer recuperación cuando el cliente probablemente regresaría sin descuento mediante grupo control.
 
-## Success Criteria
-- Ninguna comunicación se programa sin consentimiento.
-- Ninguna promoción ordinaria reduce el margen bajo el mínimo.
-- Toda selección muestra explicación y grupo experimental.
-- Toda redención respeta vigencia, estado y límite de uso.
+## Criterios de éxito
+- **SC-001**: Ninguna comunicación se programa sin consentimiento.
+- **SC-002**: Ninguna promoción ordinaria reduce el margen bajo el mínimo.
+- **SC-003**: Toda selección muestra explicación y grupo experimental.
+- **SC-004**: Toda redención respeta vigencia, estado y límite de uso.
 
-## Assumptions
+## Supuestos
 - Clientes y señales provienen de 002; márgenes de 003; ventas de 001.
 - El envío externo de email/SMS queda reemplazado por una cola auditable.
+
+## Fuera de alcance
+
+- Enviar correos o SMS mediante proveedores externos.
+- Elegir manualmente quién pertenece al grupo control después de asignarlo.
+- Aplicar promociones que ignoren el margen mínimo del producto.

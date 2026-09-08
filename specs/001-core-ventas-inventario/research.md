@@ -1,4 +1,4 @@
-# Research: Núcleo de ventas e inventario
+# Investigación: Núcleo de ventas e inventario
 
 ## MongoDB como tablas lógicas
 

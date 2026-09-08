@@ -1,4 +1,4 @@
-# Tasks: Clientes y fidelización
+# Tareas: Clientes y fidelización
 
 - [X] T001 Crear módulo e índices en `backend/modules/customers/`
 - [X] T002 [P] Crear esquemas en `backend/modules/customers/schemas.py`

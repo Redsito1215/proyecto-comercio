@@ -1,4 +1,4 @@
-# Quickstart: Promociones inteligentes
+# Guía rápida: Promociones inteligentes
 
 1. Inicie Docker y registre clientes con consentimiento de marketing.
 2. Abra **Promociones**, cree un borrador y revise la simulación de margen.

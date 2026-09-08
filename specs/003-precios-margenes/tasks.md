@@ -1,4 +1,4 @@
-# Tasks: Precios y márgenes
+# Tareas: Precios y márgenes
 
 - [X] T001 Crear paquete Spec Kit y modelo de datos
 - [X] T002 [P] Implementar cálculo decimal y clasificación de margen

@@ -1,4 +1,4 @@
-# Requirements Quality Checklist
+# Lista de comprobación de calidad de requisitos
 
 - [x] Protege margen y consentimiento
 - [x] Diferencia correlación de efecto incremental

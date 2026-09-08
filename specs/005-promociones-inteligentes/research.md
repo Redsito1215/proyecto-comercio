@@ -1,4 +1,4 @@
-# Research: Promociones inteligentes
+# Investigación: Promociones inteligentes
 
 - Asignación experimental: hash estable de campaña+cliente, reproducible y sin selección manual posterior.
 - Control: no recibe comunicación ni cupón, pero conserva elegibilidad para comparación.

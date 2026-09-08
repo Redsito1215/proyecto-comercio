@@ -1,4 +1,4 @@
-# Requirements Quality Checklist
+# Lista de comprobación de calidad de requisitos
 
 - [x] Saldos y diferencias son reproducibles
 - [x] Las señales no presuponen culpabilidad

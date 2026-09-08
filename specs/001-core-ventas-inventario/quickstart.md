@@ -1,4 +1,4 @@
-# Quickstart: validación del núcleo
+# Guía rápida: Validación del núcleo
 
 ## Requisitos
 

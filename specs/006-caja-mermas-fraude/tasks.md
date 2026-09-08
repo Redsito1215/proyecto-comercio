@@ -1,4 +1,4 @@
-# Tasks: Caja, mermas y señales de fraude
+# Tareas: Caja, mermas y señales de fraude
 
 - [X] T001 Completar paquete Spec Kit
 - [X] T002 [P] Crear esquemas e índices

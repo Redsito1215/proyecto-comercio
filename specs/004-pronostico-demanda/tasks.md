@@ -1,4 +1,4 @@
-# Tasks: Pronóstico de demanda
+# Tareas: Pronóstico de demanda
 
 - [X] T001 Completar artefactos Spec Kit
 - [X] T002 Crear agregación diaria de demanda

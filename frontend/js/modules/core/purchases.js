@@ -1,16 +1,30 @@
 (() => {
   const form = document.getElementById('purchase-form');
   const select = document.getElementById('purchase-product');
+  const supplierSelect = document.getElementById('purchase-supplier');
   const body = document.getElementById('purchase-body');
   const message = document.getElementById('purchase-message');
   const money = value => new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(Number(value));
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const header = body.closest('table').querySelector('thead tr');
   if (!header.querySelector('[data-purchase-actions]')) header.insertAdjacentHTML('beforeend', '<th data-purchase-actions>Acción</th>');
 
   async function loadProducts() {
     const response = await fetch('/api/v1/products');
     const payload = await response.json();
-    select.innerHTML = (payload.data || []).map(product => `<option value="${product.id}">${product.name} · ${product.sku}</option>`).join('');
+    const products = payload.data || [];
+    select.innerHTML = '<option value="">Seleccione un producto</option>' + products.map(product => `<option value="${product.id}">${escapeHtml(product.name)} · ${escapeHtml(product.sku)}</option>`).join('');
+    select.disabled = products.length === 0;
+  }
+
+  async function loadSuppliers() {
+    const response = await fetch('/api/v1/suppliers');
+    const payload = await response.json();
+    const suppliers = (payload.data || []).filter(supplier => supplier.active !== false);
+    supplierSelect.innerHTML = suppliers.length
+      ? '<option value="">Seleccione un proveedor</option>' + suppliers.map(supplier => `<option value="${escapeHtml(supplier.name)}">${escapeHtml(supplier.name)} · ${escapeHtml(supplier.code)}</option>`).join('')
+      : '<option value="">No hay proveedores; créelo en Administración</option>';
+    supplierSelect.disabled = suppliers.length === 0;
   }
 
   async function loadOrders() {
@@ -19,7 +33,7 @@
     const rows = payload.data || [];
     body.innerHTML = rows.length ? rows.map(order => {
       const receivable = ['sent', 'partially_received'].includes(order.status) && (order.items || []).some(item => item.pending_quantity > 0);
-      return `<tr><td><strong>${order.number}</strong></td><td>${order.supplier_name}</td><td><span class="status-pill">${order.status}</span></td><td>${money(order.total)}</td><td>${new Date(order.created_at).toLocaleDateString('es-EC')}</td><td>${receivable ? `<button class="btn" type="button" data-receive-order="${order.id}">Recibir todo</button>` : '<span class="status-pill">Completada</span>'}</td></tr>`;
+      return `<tr><td><strong>${escapeHtml(order.number)}</strong></td><td>${escapeHtml(order.supplier_name)}</td><td><span class="status-pill">${escapeHtml(order.status)}</span></td><td>${money(order.total)}</td><td>${new Date(order.created_at).toLocaleDateString('es-EC')}</td><td>${receivable ? `<button class="btn" type="button" data-receive-order="${order.id}">Recibir todo</button>` : '<span class="status-pill">Completada</span>'}</td></tr>`;
     }).join('') : '<tr><td colspan="6">Sin órdenes.</td></tr>';
     body.querySelectorAll('[data-receive-order]').forEach(button => button.addEventListener('click', () => receiveOrder(button.dataset.receiveOrder, rows.find(order => order.id === button.dataset.receiveOrder), button)));
   }
@@ -64,7 +78,7 @@
     if (response.ok) { form.reset(); await init(); }
   });
 
-  async function init() { await Promise.all([loadProducts(), loadOrders()]); }
+  async function init() { await Promise.all([loadProducts(), loadSuppliers(), loadOrders()]); }
   window.addEventListener('ci:pagechange', event => { if (event.detail?.page === 'inventario') init(); });
   init();
 })();

@@ -1,4 +1,4 @@
-# Quickstart: Clientes y fidelización
+# Guía rápida: Clientes y fidelización
 
 1. Levantar `docker compose up -d --build`.
 2. Crear dos clientes con consentimiento distinto.

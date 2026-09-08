@@ -1,4 +1,4 @@
-# Tasks: Promociones inteligentes
+# Tareas: Promociones inteligentes
 
 - [X] T001 Completar paquete Spec Kit
 - [X] T002 [P] Crear esquemas e índices

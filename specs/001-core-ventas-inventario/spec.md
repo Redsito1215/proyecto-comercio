@@ -1,23 +1,23 @@
-# Feature Specification: Núcleo de ventas e inventario
+# Especificación funcional: Núcleo de ventas e inventario
 
-**Feature Branch**: `001-core-ventas-inventario`
-**Created**: 2026-09-03
-**Status**: Completed and verified
-**Input**: Venta rápida, inventario digital, compras, lotes, caducidad, agotados y ventas perdidas.
+**Rama funcional**: `001-core-ventas-inventario`
+**Creada**: 2026-09-03
+**Estado**: Completada y verificada
+**Entrada**: Venta rápida, inventario digital, compras, lotes, caducidad, agotados y ventas perdidas.
 
-## User Scenarios & Testing *(mandatory)*
+## Escenarios de usuario y pruebas *(obligatorio)*
 
-### User Story 1 - Cobrar una venta rápidamente (Priority: P1)
+### Historia de usuario 1 - Cobrar una venta rápidamente (Prioridad: P1)
 
 Como cajero quiero localizar productos, preparar una venta y confirmarla con pocos pasos para
 atender al cliente sin demoras y descontar la mercancía correcta.
 
 **Why this priority**: La venta genera ingresos y alimenta los demás módulos.
 
-**Independent Test**: Registrar una venta de dos productos y comprobar que queda identificada y
+**Prueba independiente**: Registrar una venta de dos productos y comprobar que queda identificada y
 las existencias disminuyen exactamente una vez.
 
-**Acceptance Scenarios**:
+**Escenarios de aceptación**:
 
 1. **Given** productos activos con existencias, **When** se buscan por nombre, código o barras,
    **Then** aparecen con precio y disponibilidad vigentes.
@@ -29,17 +29,17 @@ las existencias disminuyen exactamente una vez.
 
 ---
 
-### User Story 2 - Controlar inventario por lote (Priority: P1)
+### Historia de usuario 2 - Controlar inventario por lote (Prioridad: P1)
 
 Como responsable de almacén quiero conocer existencias, lotes, caducidades y movimientos para
 detectar faltantes y productos próximos a vencer.
 
 **Why this priority**: Sin existencias confiables no se puede vender ni pronosticar.
 
-**Independent Test**: Recibir dos lotes, vender unidades y verificar cantidades, trazabilidad y
+**Prueba independiente**: Recibir dos lotes, vender unidades y verificar cantidades, trazabilidad y
 salida priorizada por caducidad.
 
-**Acceptance Scenarios**:
+**Escenarios de aceptación**:
 
 1. **Given** una recepción con lote, **When** se confirma, **Then** aumenta la existencia y se
    registra un movimiento enlazado con su origen.
@@ -50,38 +50,38 @@ salida priorizada por caducidad.
 
 ---
 
-### User Story 3 - Reponer sin inmovilizar dinero (Priority: P2)
+### Historia de usuario 3 - Reponer sin inmovilizar dinero (Prioridad: P2)
 
 Como comprador quiero crear órdenes basadas en necesidad, rotación y cobertura para evitar
 agotamientos y compras excesivas motivadas solo por un precio barato.
 
 **Why this priority**: La reposición equilibra disponibilidad y capital inmovilizado.
 
-**Independent Test**: Crear, enviar y recibir parcialmente una orden y comprobar cantidades
+**Prueba independiente**: Crear, enviar y recibir parcialmente una orden y comprobar cantidades
 recibidas, pendientes, lotes e inventario.
 
-**Acceptance Scenarios**:
+**Escenarios de aceptación**:
 
 1. **Given** productos bajo reposición, **When** se prepara una orden, **Then** se muestran
    existencia, cobertura, costo y plazo del proveedor.
 2. **Given** una recepción parcial, **When** se confirma, **Then** solo ingresa lo recibido y el
    saldo queda pendiente.
-3. **Given** una oferta superior a la necesidad, **When** se evalúa, **Then** se advierte capital
-   y días de inventario excedentes.
+3. **Given** una recepción superior a la cantidad pendiente, **When** se intenta confirmar,
+   **Then** se rechaza sin alterar la orden ni el inventario.
 
 ---
 
-### User Story 4 - Cuadrar existencias y demanda no atendida (Priority: P2)
+### Historia de usuario 4 - Cuadrar existencias y demanda no atendida (Prioridad: P2)
 
 Como supervisor quiero contar inventario, ajustar diferencias justificadas y registrar productos
 solicitados sin stock para mantener datos útiles y trazables.
 
 **Why this priority**: El inventario incorrecto distorsiona finanzas y demanda.
 
-**Independent Test**: Registrar un conteo con diferencia, aprobarlo y verificar el movimiento
+**Prueba independiente**: Registrar un conteo con diferencia, aprobarlo y verificar el movimiento
 compensatorio; registrar además una venta perdida.
 
-**Acceptance Scenarios**:
+**Escenarios de aceptación**:
 
 1. **Given** un conteo abierto, **When** se registra cantidad física, **Then** conserva la teórica.
 2. **Given** una diferencia, **When** se aprueba, **Then** crea un ajuste sin reescribir historial.
@@ -90,22 +90,22 @@ compensatorio; registrar además una venta perdida.
 
 ---
 
-### User Story 5 - Gestionar devoluciones trazables (Priority: P3)
+### Historia de usuario 5 - Gestionar devoluciones trazables (Prioridad: P3)
 
 Como supervisor quiero registrar devoluciones parciales y clasificar la mercancía para reintegrar
 solo lo apto y reconocer la merma dañada.
 
 **Why this priority**: La devolución afecta venta, inventario, pago y caja.
 
-**Independent Test**: Devolver parte de una venta, separar apto y dañado y verificar sus destinos.
+**Prueba independiente**: Devolver parte de una venta, separar apto y dañado y verificar sus destinos.
 
-**Acceptance Scenarios**:
+**Escenarios de aceptación**:
 
 1. **Given** una venta confirmada, **When** se devuelve, **Then** no supera la cantidad disponible
    para devolución.
 2. **Given** mercancía apta y dañada, **When** se confirma, **Then** solo lo apto vuelve a stock.
 
-### Edge Cases
+### Casos límite
 
 - Dos cajeros intentan vender la última unidad simultáneamente.
 - El precio cambia mientras la venta está abierta.
@@ -114,9 +114,9 @@ solo lo apto y reconocer la merma dañada.
 - Un conteo permanece abierto mientras ocurren movimientos.
 - Se intenta devolver una venta anulada o fuera de plazo.
 
-## Requirements *(mandatory)*
+## Requisitos *(obligatorio)*
 
-### Functional Requirements
+### Requisitos funcionales
 
 - **FR-001**: El sistema MUST administrar categorías, productos, unidades, códigos y estado.
 - **FR-002**: El sistema MUST localizar productos por nombre, código o código de barras único.
@@ -128,12 +128,12 @@ solo lo apto y reconocer la merma dañada.
 - **FR-008**: Cada cambio MUST generar un movimiento inmutable con origen y responsable.
 - **FR-009**: Los perecederos MUST gestionarse por lote y caducidad.
 - **FR-010**: La salida MUST priorizar el lote utilizable que venza primero.
-- **FR-011**: El sistema MUST alertar stock bajo, agotamiento y caducidad próxima.
-- **FR-012**: Las alertas MUST incluir cantidad, valor económico y acción sugerida.
+- **FR-011**: El sistema MUST identificar stock disponible, stock bajo, agotamiento y lotes con caducidad próxima.
+- **FR-012**: La consulta de inventario MUST permitir filtrar por producto, SKU, ubicación y estado operativo.
 - **FR-013**: El sistema MUST administrar proveedores y productos suministrados.
-- **FR-014**: Las órdenes MUST admitir borrador, envío, recepción parcial, cierre y cancelación.
+- **FR-014**: Las órdenes MUST admitir envío, recepción parcial y recepción completa, conservando cantidades pendientes.
 - **FR-015**: Cada recepción MUST actualizar orden, lotes, stock y movimientos atómicamente.
-- **FR-016**: El sistema MUST mostrar cobertura y capital excedente al evaluar compras.
+- **FR-016**: El sistema MUST mostrar órdenes, proveedor, estado, total, fecha y líneas recibidas o pendientes.
 - **FR-017**: El sistema MUST permitir conteos totales y parciales.
 - **FR-018**: Todo ajuste MUST exigir motivo, autorización y movimiento compensatorio.
 - **FR-019**: El sistema MUST registrar ventas perdidas por falta de stock.
@@ -142,8 +142,10 @@ solo lo apto y reconocer la merma dañada.
 - **FR-022**: Los maestros desactivados MUST conservar su historial consultable.
 - **FR-023**: Las operaciones sensibles MUST registrarse en auditoría.
 - **FR-024**: El acceso MUST depender del rol y autorización vigente.
+- **FR-025**: La consulta de movimientos MUST mostrar producto, SKU, tipo, cantidad, ubicación, costo, origen, fecha y responsable, con filtros por producto, ubicación, tipo y período.
+- **FR-026**: Al crear una orden de compra, el proveedor MUST seleccionarse del catálogo de proveedores activos para evitar nombres inconsistentes.
 
-### Key Entities *(include if feature involves data)*
+### Entidades principales
 
 - **Producto**: Artículo vendible con códigos, unidad, categoría y estado.
 - **Ubicación y existencia**: Cantidades disponibles y reservadas por producto.
@@ -155,9 +157,9 @@ solo lo apto y reconocer la merma dañada.
 - **Venta perdida**: Demanda observada que no pudo atenderse.
 - **Devolución**: Reversión con inspección y destino de mercancía.
 
-## Success Criteria *(mandatory)*
+## Criterios de éxito *(obligatorio)*
 
-### Measurable Outcomes
+### Resultados medibles
 
 - **SC-001**: Un cajero completa una venta de cinco productos en menos de 60 segundos.
 - **SC-002**: El 100 % de ventas produce exactamente un descuento conciliable de inventario.
@@ -166,11 +168,18 @@ solo lo apto y reconocer la merma dañada.
 - **SC-005**: Un responsable identifica agotados y caducidades en menos de 30 segundos.
 - **SC-006**: Todas las recepciones parciales mantienen cantidades pendientes conciliadas.
 - **SC-007**: Todas las ventas perdidas quedan disponibles para analizar demanda.
+- **SC-008**: Un responsable identifica en menos de 30 segundos qué producto fue afectado por una merma y consulta su movimiento de origen.
 
-## Assumptions
+## Supuestos
 
 - El comercio inicia con una ubicación, pero admite varias.
 - Pagos y caja pertenecen a las especificaciones 007 y 006.
 - Precios y márgenes se gobiernan en 003; la venta guarda su copia histórica.
 - Los umbrales de stock y caducidad son configurables.
 - Ninguna recomendación confirma compras o ajustes sin autorización humana.
+
+## Fuera de alcance
+
+- El procesamiento de pagos y la conciliación de caja, definidos en las especificaciones 007 y 006.
+- El cálculo de pronósticos, promociones y segmentación de clientes, cubiertos por las especificaciones 004, 005 y 002.
+- La creación automática de órdenes de compra sin revisión y confirmación humana.

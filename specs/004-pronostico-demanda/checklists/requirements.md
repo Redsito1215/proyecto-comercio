@@ -1,4 +1,4 @@
-# Requirements Quality Checklist
+# Lista de comprobación de calidad de requisitos
 
 - [x] Escenarios independientes y verificables
 - [x] Considera promoción, precio, sustitutos, disponibilidad y ventas perdidas

@@ -1,4 +1,4 @@
-# Data Model: Caja, mermas y señales
+# Modelo de datos: Caja, mermas y señales
 
 ## Tablas lógicas MongoDB
 - `cash_sessions`: register_id, location_id, status, opening_amount, opened_by/at, expected_balance, counted_balance, difference, closed_by/at.
@@ -11,3 +11,15 @@
 - Una sesión abierta por caja mediante índice único parcial.
 - Idempotencia única para movimientos.
 - Alertas por estado, severidad y fecha.
+
+## Relaciones y reglas
+
+- Cada movimiento y arqueo pertenece a una sesión existente.
+- El saldo esperado se deriva del fondo y movimientos; no es un valor libremente editable.
+- Un cierre exige sesión abierta y conserva contado, diferencia, fecha y responsable.
+- Una merma referencia producto, ubicación y opcionalmente lote, y reduce inventario en la misma transacción.
+- Una alerta conserva evidencia y puede resolverse, pero no se elimina ni constituye una acusación.
+
+## Ciclo de vida
+
+La sesión pasa de abierta a cerrada. Las alertas pasan de abiertas a resueltas con conclusión y actor. Las correcciones contables se representan mediante nuevos movimientos compensatorios.

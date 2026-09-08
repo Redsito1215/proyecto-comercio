@@ -1,4 +1,4 @@
-# Requirements Quality Checklist
+# Lista de comprobación de calidad de requisitos
 
 - [x] No se almacenan datos completos de tarjeta
 - [x] Se diferencia sandbox de producción
