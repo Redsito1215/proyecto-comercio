@@ -1,4 +1,4 @@
-# Tasks: Pagos y seguridad
+# Tareas: Pagos y seguridad
 
 - [X] T001 Completar paquete Spec Kit
 - [X] T002 [P] Crear esquemas e índices de seguridad
@@ -23,3 +23,5 @@
 - [X] T017 Conciliar pagos en efectivo con una sesión de caja abierta sin duplicar movimientos.
 - [X] T018 Añadir filtros, previsualización y PDF para auditoría e informes compuestos.
 - [X] T019 Verificar el flujo completo y escenarios negativos en contenedores saludables.
+- [X] T020 Sustituir la escritura manual del identificador por un selector de ventas pendientes de cobro.
+- [X] T021 Generar y descargar un comprobante PDF interno después de un pago aprobado.

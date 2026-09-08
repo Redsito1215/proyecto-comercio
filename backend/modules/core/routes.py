@@ -8,7 +8,7 @@ from backend.common.serialization import to_json, to_mongo
 from backend.db import get_db
 from backend.modules.core.repositories import insert_product, search_products
 from backend.modules.core.schemas import CatalogCreate, InventoryReceiptCreate, LocationCreate, LostSaleCreate, ProductCreate, PurchaseOrderCreate, PurchaseReceiptCreate, ReturnCreate, SaleCreate, StockCountCreate, SupplierCreate
-from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_return, create_sale_draft, create_stock_count, inventory_snapshot, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
+from backend.modules.core.services import approve_stock_count, confirm_sale, create_purchase_order, create_return, create_sale_draft, create_stock_count, dashboard_summary, inventory_snapshot, list_inventory_movements, list_purchase_orders, receive_inventory, receive_purchase_order, record_lost_sale, serialize_product
 
 core_bp = Blueprint("core", __name__, url_prefix="/api/v1")
 
@@ -18,6 +18,12 @@ def validate(model, payload):
         return model.model_validate(payload or {})
     except ValidationError as error:
         raise ApiError(error.errors(include_url=False)[0]["msg"], 422, "validation_error") from error
+
+
+@core_bp.get("/dashboard/summary")
+@require_permission("sales.read")
+def dashboard_get():
+    return jsonify({"data": dashboard_summary(get_db())})
 
 
 @core_bp.get("/products")
@@ -108,6 +114,20 @@ def sales_confirm(sale_id):
 @require_permission("inventory.read")
 def inventory_list():
     return jsonify({"data": inventory_snapshot(get_db())})
+
+
+@core_bp.get("/inventory/movements")
+@require_permission("inventory.read")
+def inventory_movements_list():
+    try:
+        limit = int(request.args.get("limit", "500"))
+    except ValueError as error:
+        raise ApiError("Límite inválido", 422, "validation_error") from error
+    return jsonify({"data": list_inventory_movements(
+        get_db(), product_id=request.args.get("product_id", ""),
+        location_id=request.args.get("location_id", ""), movement_type=request.args.get("type", ""),
+        date_from=request.args.get("date_from", ""), date_to=request.args.get("date_to", ""), limit=limit,
+    )})
 
 
 @core_bp.post("/inventory/receipts")

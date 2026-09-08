@@ -47,9 +47,22 @@ def test_payment_is_idempotent_and_stores_no_pan_or_cvv():
     assert first.status_code==201 and second.status_code==201 and first.json['data']['id']==second.json['data']['id']
     payment=db.payments.find_one();serialized=str(payment).lower();assert '4111111111111111' not in serialized and 'cvv' not in serialized and 'tok_approved_opaque' not in serialized
     assert payment['status']=='approved' and db.payments.count_documents({})==1
+    receipt=client.get(f"/api/v1/payments/{first.json['data']['id']}/receipt.pdf")
+    assert receipt.status_code==200 and receipt.mimetype=='application/pdf' and receipt.data.startswith(b'%PDF')
 
 
 def test_payment_cannot_exceed_sale_balance():
     db=get_db();clear(db);sid=db.sales.insert_one({'number':'VTA-PAY-2','status':'confirmed','total':Decimal128('5'),'created_at':datetime.now(UTC)}).inserted_id
     response=create_app(testing=True).test_client().post('/api/v1/payments',headers={'Idempotency-Key':'too-much'},json={'sale_id':str(sid),'method':'cash','amount':'6'})
     assert response.status_code==409
+
+
+def test_pending_sales_lists_only_balance_due():
+    db=get_db();clear(db);now=datetime.now(UTC)
+    pending=db.sales.insert_one({'number':'VTA-PENDIENTE','status':'confirmed','total':Decimal128('12'),'paid_amount':Decimal128('2'),'created_at':now,'confirmed_at':now}).inserted_id
+    db.sales.insert_one({'number':'VTA-PAGADA','status':'confirmed','total':Decimal128('5'),'paid_amount':Decimal128('5'),'created_at':now,'confirmed_at':now})
+    response=create_app(testing=True).test_client().get('/api/v1/payments/pending-sales')
+    assert response.status_code==200
+    assert len(response.json['data'])==1
+    assert response.json['data'][0]['id']==str(pending)
+    assert response.json['data'][0]['due']=='10'

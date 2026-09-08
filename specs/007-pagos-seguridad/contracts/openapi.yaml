@@ -1,6 +1,10 @@
 openapi: 3.1.0
 info: {title: Comercio Inteligente - Pagos y seguridad, version: 1.0.0}
 paths:
+  /api/v1/payments/pending-sales:
+    get: {summary: Listar ventas confirmadas con saldo pendiente, responses: {'200': {description: Ventas disponibles para cobro}}}
+  /api/v1/payments/{id}/receipt.pdf:
+    get: {summary: Generar comprobante interno de un pago aprobado, responses: {'200': {description: Comprobante PDF}, '404': {description: Pago no encontrado}}}
   /api/v1/security/bootstrap:
     post: {summary: Crea el administrador inicial una sola vez, responses: {'201': {description: Creado}, '409': {description: Inicialización cerrada}}}
   /api/v1/security/bootstrap/status:

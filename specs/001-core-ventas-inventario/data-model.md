@@ -1,4 +1,4 @@
-# Data Model: Núcleo de ventas e inventario
+# Modelo de datos: Núcleo de ventas e inventario
 
 MongoDB implementa cada entrada como colección, pero el proyecto la denomina **tabla lógica**.
 Todos los documentos incluyen `_id`, `created_at`, `updated_at` y `version` cuando admiten edición.

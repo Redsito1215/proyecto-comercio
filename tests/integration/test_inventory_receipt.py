@@ -16,3 +16,13 @@ def test_receipt_creates_lot_stock_and_movement():
     assert db.inventory.find_one({"product_id": product_id})["available"] == 8
     assert db.lots.find_one({"product_id": product_id})["available_quantity"] == 8
     assert db.inventory_movements.count_documents({"type": "receipt"}) == 1
+    movements = client.get("/api/v1/inventory/movements?type=receipt").json["data"]
+    assert len(movements) == 1
+    assert movements[0]["product_name"] == "Leche"
+    assert movements[0]["sku"] == "LOT-1"
+    assert movements[0]["quantity"] == 8
+    movements = client.get("/api/v1/inventory/movements?type=receipt").json["data"]
+    assert len(movements) == 1
+    assert movements[0]["product_name"] == "Leche"
+    assert movements[0]["sku"] == "LOT-1"
+    assert movements[0]["quantity"] == 8

@@ -1,4 +1,4 @@
-# Quickstart: Pronóstico de demanda
+# Guía rápida: Pronóstico de demanda
 
 1. Inicie Docker con `docker compose up -d --build`.
 2. Registre ventas, agotados y ventas perdidas.

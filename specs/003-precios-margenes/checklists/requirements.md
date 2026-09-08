@@ -1,4 +1,4 @@
-# Requirements Quality Checklist
+# Lista de comprobación de calidad de requisitos
 
 - [x] Sin detalles de implementación en escenarios
 - [x] Requisitos verificables y sin ambigüedad de fórmula

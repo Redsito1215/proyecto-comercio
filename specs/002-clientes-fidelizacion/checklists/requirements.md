@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Clientes y fidelización
+# Lista de comprobación de calidad: Clientes y fidelización
 - [x] Sin detalles de implementación en requisitos
 - [x] Historias independientes y priorizadas
 - [x] Requisitos comprobables

@@ -1,4 +1,4 @@
-# Quickstart: Caja, mermas y señales
+# Guía rápida: Caja, mermas y señales
 
 1. Abra una caja con su fondo inicial.
 2. Confirme una venta y cobre en efectivo; el ingreso de caja se registra automáticamente.

@@ -5,6 +5,8 @@ info:
 servers:
   - url: /api/v1
 paths:
+  /dashboard/summary:
+    get: {summary: Consultar indicadores y ventas recientes del resumen, responses: {'200': {description: Resumen operativo}}}
   /categories:
     get: {summary: Listar categorías, responses: {'200': {description: Lista}}}
     post: {summary: Crear categoría, responses: {'201': {description: Creada}, '409': {description: Código duplicado}}}
@@ -30,6 +32,19 @@ paths:
       summary: Consultar existencias, lotes y alertas
       responses:
         '200': { description: Inventario consultado }
+  /inventory/movements:
+    get:
+      summary: Consultar movimientos trazables de inventario
+      parameters:
+        - { name: product_id, in: query, schema: { type: string } }
+        - { name: location_id, in: query, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string } }
+        - { name: date_from, in: query, schema: { type: string, format: date } }
+        - { name: date_to, in: query, schema: { type: string, format: date } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000 } }
+      responses:
+        '200': { description: Movimientos con producto, origen, ubicación, costo, fecha y responsable }
+        '422': { description: Filtro inválido }
   /inventory/receipts:
     post:
       summary: Registrar entrada directa de inventario

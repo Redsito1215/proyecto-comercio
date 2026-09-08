@@ -1,4 +1,4 @@
-# Research: Pagos y seguridad
+# Investigación: Pagos y seguridad
 
 - Contraseñas: `scrypt` mediante Werkzeug, con salt individual.
 - Sesiones: token aleatorio de alta entropía; MongoDB guarda SHA-256 y TTL.

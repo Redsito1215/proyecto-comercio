@@ -1,4 +1,4 @@
-# Research: Pronóstico de demanda
+# Investigación: Pronóstico de demanda
 
 - Base: mediana móvil robusta para no dejar que un único pico domine.
 - Demanda censurada: ventas perdidas se añaden como señal, con menor confianza si el agotado no fue medido.

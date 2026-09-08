@@ -1,4 +1,4 @@
-# Data Model: Pagos y seguridad
+# Modelo de datos: Pagos y seguridad
 
 ## Tablas lógicas MongoDB
 - `users`: name, email_normalized, password_hash, roles (códigos), status, failed_attempts, locked_until, created_at.
@@ -17,3 +17,15 @@ movimiento `sale` en `cash_movements`; la clave de origen impide duplicarlo.
 - Hash de sesión único con TTL por expiración.
 - Claves de idempotencia únicas en pagos y reembolsos.
 - Clave única de origen para movimientos de caja asociados a pagos.
+
+## Relaciones y reglas
+
+- Un usuario puede tener varios roles y sesiones; una sesión revocada o vencida no autoriza solicitudes.
+- Los roles del sistema mantienen código único y conjunto explícito de permisos.
+- Un pago referencia una venta, no supera su saldo pendiente y no almacena PAN ni CVV.
+- Un reembolso pertenece a un pago aprobado y no puede superar el importe reembolsable.
+- Los eventos de auditoría sanitizan metadatos antes de persistirlos.
+
+## Ciclos de vida
+
+Usuarios y sesiones pueden activarse, bloquearse o revocarse sin borrar su historia. Pagos y reembolsos conservan el resultado recibido. La configuración mantiene actor y fechas de modificación para reconstruir cambios administrativos.

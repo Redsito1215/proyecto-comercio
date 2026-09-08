@@ -1,4 +1,4 @@
-# Quickstart: Pagos y seguridad
+# Guía rápida: Pagos y seguridad
 
 1. Consulte `/api/v1/security/bootstrap/status`; cree el administrador inicial únicamente si está habilitado.
 2. Inicie sesión y use `Authorization: Bearer <token>`; compruebe los permisos efectivos devueltos.

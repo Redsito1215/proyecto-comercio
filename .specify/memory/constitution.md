@@ -8,7 +8,7 @@ Sync Impact Report
 -->
 # Constitución de Comercio Inteligente
 
-## Core Principles
+## Principios fundamentales
 
 ### I. Desarrollo dirigido por especificaciones
 Toda funcionalidad MUST comenzar y conservar trazabilidad en una de las siete carpetas
@@ -81,7 +81,7 @@ Los documentos MUST usar fechas ISO `YYYY-MM-DD`, criterios medibles y lenguaje 
 MUST/MUST NOT cuando corresponda. Ninguna decisión técnica MAY contradecir esta constitución
 sin una enmienda versionada.
 
-## Governance
+## Gobernanza
 
 Esta constitución prevalece sobre planes, tareas, código y preferencias de implementación.
 Toda enmienda MUST explicar el motivo, impacto, migración requerida y artefactos afectados.
@@ -91,4 +91,4 @@ especificación MUST comprobar estructura, trazabilidad, seguridad, pruebas, exp
 despliegue Docker. Las excepciones MUST quedar justificadas en el plan y aprobadas antes de
 la implementación.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-03 | **Last Amended**: 2026-09-03
+**Versión**: 1.0.0 | **Ratificada**: 2026-09-03 | **Última modificación**: 2026-09-03

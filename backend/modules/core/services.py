@@ -77,6 +77,41 @@ def inventory_snapshot(db):
     return rows
 
 
+def list_inventory_movements(db, product_id="", location_id="", movement_type="", date_from="", date_to="", limit=500):
+    criteria = {}
+    if product_id:
+        if not ObjectId.is_valid(product_id):
+            raise ApiError("Producto inválido", 422, "validation_error")
+        criteria["product_id"] = ObjectId(product_id)
+    if location_id:
+        criteria["location_id"] = location_id
+    if movement_type:
+        criteria["type"] = movement_type
+    date_criteria = {}
+    try:
+        if date_from:
+            date_criteria["$gte"] = datetime.fromisoformat(date_from).replace(tzinfo=UTC)
+        if date_to:
+            end = datetime.fromisoformat(date_to).replace(tzinfo=UTC)
+            date_criteria["$lt"] = end.replace(hour=23, minute=59, second=59, microsecond=999999)
+    except ValueError as error:
+        raise ApiError("Rango de fechas inválido", 422, "validation_error") from error
+    if date_criteria:
+        criteria["occurred_at"] = date_criteria
+    rows = []
+    for movement in db.inventory_movements.find(criteria).sort("occurred_at", -1).limit(min(max(limit, 1), 1000)):
+        product = db.products.find_one({"_id": movement.get("product_id")}) or {}
+        actor_id = movement.get("actor_id")
+        actor = db.users.find_one({"_id": ObjectId(actor_id)}) if actor_id and ObjectId.is_valid(str(actor_id)) else None
+        rows.append({
+            **to_json(movement), "id": str(movement["_id"]),
+            "product_name": product.get("name", "Producto no disponible"),
+            "sku": product.get("sku", ""),
+            "actor_name": (actor or {}).get("name", str(actor_id or "Sistema")),
+        })
+    return rows
+
+
 def create_purchase_order(db, model, actor_id: str):
     now = datetime.now(UTC); total = Decimal("0"); prepared = []
     for line in model.items:
@@ -288,3 +323,45 @@ def serialize_sale(sale):
     for item in sale.get("items", []):
         item["id"] = item.pop("_id")
     return sale
+
+
+def dashboard_summary(db):
+    """Resumen operativo basado en datos persistidos, no en valores de plantilla."""
+    now = datetime.now(UTC)
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    sales_query = {
+        "status": {"$in": ["confirmed", "partially_returned"]},
+        "confirmed_at": {"$gte": start, "$lte": now},
+    }
+    today_sales = list(db.sales.find(sales_query).sort("confirmed_at", -1))
+    today_total = sum(
+        (row.get("total", Decimal128("0")).to_decimal() for row in today_sales),
+        Decimal("0"),
+    )
+    product_count = db.products.count_documents({"active": True})
+    threshold = (db.settings.find_one({"key": "business"}) or {}).get("low_stock_threshold", 5)
+    low_stock = db.inventory.count_documents({"available": {"$lte": threshold}})
+
+    margins = []
+    for product in db.products.find({"active": True, "current_price": {"$exists": True}}):
+        price = product["current_price"].to_decimal()
+        cost = product.get("average_cost", Decimal128("0")).to_decimal()
+        if price > 0:
+            margins.append(((price - cost) / price * Decimal("100")))
+    average_margin = (sum(margins, Decimal("0")) / len(margins)).quantize(Decimal("0.01")) if margins else None
+
+    recent = []
+    for row in db.sales.find({"status": {"$in": ["confirmed", "partially_returned"]}}).sort("confirmed_at", -1).limit(6):
+        customer = db.customers.find_one({"_id": row.get("customer_id")}) if isinstance(row.get("customer_id"), ObjectId) else None
+        recent.append({
+            "id": str(row["_id"]), "number": row.get("number", "Venta"),
+            "customer": customer.get("name") if customer else "Consumidor final",
+            "status": row["status"], "total": str(row.get("total", Decimal128("0")).to_decimal()),
+            "confirmed_at": (row.get("confirmed_at") or row.get("created_at")).isoformat(),
+        })
+    return {
+        "today_sales": str(today_total), "today_operations": len(today_sales),
+        "active_products": product_count, "low_stock": low_stock,
+        "average_margin": str(average_margin) if average_margin is not None else None,
+        "recent_sales": recent,
+    }

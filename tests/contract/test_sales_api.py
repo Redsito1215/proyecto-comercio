@@ -20,3 +20,15 @@ def test_confirm_requires_idempotency_key():
     response = client.post("/api/v1/sales/000000000000000000000000/confirm")
     assert response.status_code == 400
     assert response.json["error"]["code"] == "idempotency_key_required"
+
+
+def test_inventory_movements_reject_invalid_limit():
+    response = create_app(testing=True).test_client().get("/api/v1/inventory/movements?limit=no-numero")
+    assert response.status_code == 422
+    assert response.json["error"]["code"] == "validation_error"
+
+
+def test_inventory_movements_reject_invalid_limit():
+    response = create_app(testing=True).test_client().get("/api/v1/inventory/movements?limit=no-numero")
+    assert response.status_code == 422
+    assert response.json["error"]["code"] == "validation_error"

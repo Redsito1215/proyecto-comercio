@@ -52,6 +52,38 @@ def create_payment(db,model,key,actor):
 def list_payments(db):return [serialize(x) for x in db.payments.find().sort("created_at",-1).limit(100)]
 
 
+def list_payable_sales(db):
+    rows=[]
+    for sale in db.sales.find({"status":{"$in":["confirmed","partially_returned"]}}).sort("confirmed_at",-1).limit(200):
+        total=dec(sale.get("total",0));paid=dec(sale.get("paid_amount",0));due=total-paid
+        if due<=0:continue
+        customer_id=sale.get("customer_id");customer=None
+        if customer_id:
+            identifier=customer_id if isinstance(customer_id,ObjectId) else ObjectId(customer_id) if ObjectId.is_valid(str(customer_id)) else None
+            if identifier:customer=db.customers.find_one({"_id":identifier})
+        rows.append({"id":str(sale["_id"]),"number":sale.get("number","Venta"),"customer":(customer or {}).get("name","Consumidor final"),"total":str(total),"paid_amount":str(paid),"due":str(due),"confirmed_at":to_json(sale.get("confirmed_at") or sale.get("created_at"))})
+    return rows
+
+
+def receipt_data(db,payment_id):
+    if not ObjectId.is_valid(payment_id):raise ApiError("Pago no encontrado",404,"payment_not_found")
+    payment=db.payments.find_one({"_id":ObjectId(payment_id),"status":{"$in":["approved","refunded"]}})
+    if not payment:raise ApiError("Pago no disponible para comprobante",404,"payment_not_found")
+    sale=db.sales.find_one({"_id":payment["sale_id"]})
+    if not sale:raise ApiError("Venta no encontrada",404,"sale_not_found")
+    customer_id=sale.get("customer_id");customer=None
+    if customer_id:
+        identifier=customer_id if isinstance(customer_id,ObjectId) else ObjectId(customer_id) if ObjectId.is_valid(str(customer_id)) else None
+        if identifier:customer=db.customers.find_one({"_id":identifier})
+    items=[]
+    for line in db.sale_items.find({"sale_id":sale["_id"]}):
+        product=db.products.find_one({"_id":line["product_id"]}) or {};price=dec(line.get("unit_price",line.get("price",0)));quantity=line.get("quantity",0)
+        items.append({"name":product.get("name",line.get("product_name","Producto")),"sku":product.get("sku",line.get("sku","-")),"quantity":quantity,"unit_price":f"${price:.2f}","line_total":f"${(price*quantity):.2f}"})
+    total=dec(sale.get("total",0));paid=dec(sale.get("paid_amount",0));settings=db.settings.find_one({"key":"business"}) or {};occurred=payment.get("processed_at") or payment.get("created_at")
+    methods={"cash":"Efectivo","card":"Tarjeta tokenizada","wallet":"Billetera electrónica","transfer":"Transferencia"}
+    return {"business_name":settings.get("business_name","Comercio Inteligente"),"sale_number":sale.get("number","Venta"),"sale_date":to_json(sale.get("confirmed_at") or sale.get("created_at"))[:19].replace("T"," "),"customer_name":(customer or {}).get("name","Consumidor final"),"customer_document":(customer or {}).get("document","No registrado"),"payment_id":str(payment["_id"]),"payment_method":methods.get(payment.get("method"),payment.get("method","-")),"items":items,"sale_total":f"${total:.2f}","payment_amount":f"${dec(payment['amount']):.2f}","remaining_due":f"${max(total-paid,Decimal('0')):.2f}","generated_at":to_json(occurred)[:19].replace("T"," ")}
+
+
 def refund_payment(db,pid,model,key,actor):
     prior=db.refunds.find_one({"idempotency_key":key})
     if prior:return serialize(prior)
